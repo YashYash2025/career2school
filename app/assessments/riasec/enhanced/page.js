@@ -441,41 +441,7 @@ const RIASECInternationalAssessment = () => {
     textSecondary: '#a8a8b8'
   };
 
-  useEffect(() => {
-    if (currentStage === 'loading' && questions.length === 0) {
-      loadQuestions();
-    }
-  }, [currentStage, assessmentConfig.version, loadQuestions, questions.length]); // Added missing dependencies
-
-  // Keyboard navigation
-  useEffect(() => {
-    const handleKeyPress = (event) => {
-      if (currentStage !== 'assessment') return;
-      
-      // Number keys for answers
-      if (event.key >= '0' && event.key <= '2') {
-        const value = parseInt(event.key);
-        handleAnswer(value);
-      }
-      
-      // Arrow keys for navigation
-      if (event.key === 'ArrowLeft' && currentQuestion > 0) {
-        goToPreviousQuestion();
-      }
-      if (event.key === 'ArrowRight' && currentQuestion < questions.length - 1 && answers[currentQuestion] !== undefined) {
-        goToNextQuestion();
-      }
-      
-      // Enter to finish assessment on last question
-      if (event.key === 'Enter' && currentQuestion === questions.length - 1 && answers[currentQuestion] !== undefined) {
-        goToNextQuestion();
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyPress);
-    return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [currentStage, currentQuestion, answers, questions.length, goToNextQuestion, goToPreviousQuestion, handleAnswer]); // Added missing dependencies
-
+  // تعريف الدوال قبل useEffect
   const loadQuestions = async () => {
     try {
       console.log('🔄 Loading questions with config:', assessmentConfig);
@@ -518,17 +484,6 @@ const RIASECInternationalAssessment = () => {
     }
   };
 
-
-
-  const startAssessment = (config = {}) => {
-    setAssessmentConfig(prev => ({ ...prev, ...config }));
-    setCurrentStage('assessment');
-    setCurrentQuestion(0);
-    setAnswers({});
-    setStartTime(new Date());
-    clearError();
-  };
-
   const handleAnswer = (value) => {
     const newAnswers = { ...answers, [currentQuestion]: value };
     setAnswers(newAnswers);
@@ -556,6 +511,41 @@ const RIASECInternationalAssessment = () => {
       finishAssessment(answers);
     }
   };
+
+  useEffect(() => {
+    if (currentStage === 'loading' && questions.length === 0) {
+      loadQuestions();
+    }
+  }, [currentStage, assessmentConfig.version, loadQuestions, questions.length]); // Added missing dependencies
+
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeyPress = (event) => {
+      if (currentStage !== 'assessment') return;
+      
+      // Number keys for answers
+      if (event.key >= '0' && event.key <= '2') {
+        const value = parseInt(event.key);
+        handleAnswer(value);
+      }
+      
+      // Arrow keys for navigation
+      if (event.key === 'ArrowLeft' && currentQuestion > 0) {
+        goToPreviousQuestion();
+      }
+      if (event.key === 'ArrowRight' && currentQuestion < questions.length - 1 && answers[currentQuestion] !== undefined) {
+        goToNextQuestion();
+      }
+      
+      // Enter to finish assessment on last question
+      if (event.key === 'Enter' && currentQuestion === questions.length - 1 && answers[currentQuestion] !== undefined) {
+        goToNextQuestion();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [currentStage, currentQuestion, answers, questions.length, goToNextQuestion, goToPreviousQuestion, handleAnswer]); // Added missing dependencies
 
   const finishAssessment = async (finalAnswers) => {
     try {
