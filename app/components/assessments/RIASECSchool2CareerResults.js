@@ -441,7 +441,7 @@ const RIASECSchool2CareerResults = ({
             color: colors.future,
             fontFamily: 'Cairo, Arial, sans-serif'
           }}>
-            &ldquo;تذكر: كل حلم كبير بدأ بخطوة صغيرة 🌱&rdquo;
+            "تذكر: كل حلم كبير بدأ بخطوة صغيرة 🌱"
           </div>
         </div>
       </div>
