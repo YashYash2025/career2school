@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import useRIASECInternational from '../../../hooks/useRIASECInternational';
 import RIASECInternationalResults from '../../../components/assessments/RIASECInternationalResults';
@@ -445,7 +445,7 @@ const RIASECInternationalAssessment = () => {
     if (currentStage === 'loading' && questions.length === 0) {
       loadQuestions();
     }
-  }, [currentStage, assessmentConfig.version]); // Changed from 'assessment' to 'loading'
+  }, [currentStage, assessmentConfig.version, loadQuestions, questions.length]); // Added missing dependencies
 
   // Keyboard navigation
   useEffect(() => {
@@ -474,7 +474,7 @@ const RIASECInternationalAssessment = () => {
 
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [currentStage, currentQuestion, answers, questions.length]);
+  }, [currentStage, currentQuestion, answers, questions.length, goToNextQuestion, goToPreviousQuestion, handleAnswer]); // Added missing dependencies
 
   const loadQuestions = async () => {
     try {
@@ -1504,4 +1504,19 @@ const RIASECInternationalAssessment = () => {
   return null;
 };
 
-export default RIASECInternationalAssessment;
+const RIASECWithSuspense = () => {
+  return (
+    <Suspense fallback={<div style={{
+      minHeight: '100vh',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      background: 'linear-gradient(135deg, #0f0f1e 0%, #1a1a2e 50%, #16213e 100%)',
+      color: 'white'
+    }}>جاري التحميل...</div>}>
+      <RIASECInternationalAssessment />
+    </Suspense>
+  );
+};
+
+export default RIASECWithSuspense;
