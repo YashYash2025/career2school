@@ -1,4 +1,5 @@
 'use client';
+'use client';
 
 import { useEffect, useRef } from 'react';
 
@@ -6,21 +7,29 @@ export default function AnimatedBackground() {
   const backgroundRef = useRef(null);
 
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
     const background = backgroundRef.current;
     if (!background) return;
 
     // تأثير تغيير موضع الخلفية عند تحريك الماوس
     const handleMouseMove = (e) => {
-      const { clientX, clientY } = e;
-      const x = (clientX / window.innerWidth) * 100;
-      const y = (clientY / window.innerHeight) * 100;
-      background.style.backgroundPosition = `${x}% ${y}%`;
+      try {
+        const { clientX, clientY } = e;
+        const x = (clientX / window.innerWidth) * 100;
+        const y = (clientY / window.innerHeight) * 100;
+        background.style.backgroundPosition = `${x}% ${y}%`;
+      } catch (error) {
+        console.log('Mouse move error:', error);
+      }
     };
 
     window.addEventListener('mousemove', handleMouseMove);
 
     return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('mousemove', handleMouseMove);
+      }
     };
   }, []);
 
