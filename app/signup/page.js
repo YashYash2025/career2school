@@ -6,25 +6,380 @@ import { useRouter } from 'next/navigation'
 
 export default function Signup() {
   const [formData, setFormData] = useState({
+    // البيانات الشخصية
     name: '',
     email: '',
     password: '',
     confirmPassword: '',
+    phone: '',
+    
+    // البيانات الديموغرافية
     age: '',
     gender: '',
-    education: ''
+    birthDate: '',
+    
+    // البيانات الجغرافية
+    country: '',
+    governorate: '',
+    city: '',
+    
+    // البيانات التعليمية
+    educationLevel: '', // إعدادي/ثانوي/جامعي/خريج
+    currentGrade: '', // الصف الحالي
+    school: '', // اسم المدرسة/الجامعة
+    specialization: '', // التخصص
+    
+    // اللغة المفضلة
+    preferredLanguage: 'ar' // ar, en, fr
   })
   const [isLoading, setIsLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const router = useRouter()
 
+  // بيانات البلدان والمحافظات
+  const countries = {
+    'EG': {
+      name: { ar: 'مصر', en: 'Egypt', fr: 'Égypte' },
+      governorates: [
+        { code: 'CAI', name: { ar: 'القاهرة', en: 'Cairo', fr: 'Le Caire' } },
+        { code: 'GIZ', name: { ar: 'الجيزة', en: 'Giza', fr: 'Gizeh' } },
+        { code: 'ALX', name: { ar: 'الإسكندرية', en: 'Alexandria', fr: 'Alexandrie' } },
+        { code: 'SHR', name: { ar: 'الشرقية', en: 'Sharqia', fr: 'Charqiya' } },
+        { code: 'MNF', name: { ar: 'المنوفية', en: 'Monufia', fr: 'Ménoufia' } },
+        { code: 'QAL', name: { ar: 'القليوبية', en: 'Qalyubia', fr: 'Qalyubia' } },
+        { code: 'GHR', name: { ar: 'الغربية', en: 'Gharbia', fr: 'Gharbia' } },
+        { code: 'BHR', name: { ar: 'البحيرة', en: 'Beheira', fr: 'Beheira' } },
+        { code: 'KFS', name: { ar: 'كفر الشيخ', en: 'Kafr El Sheikh', fr: 'Kafr el-Cheikh' } },
+        { code: 'DQH', name: { ar: 'الدقهلية', en: 'Dakahlia', fr: 'Dakahlia' } },
+        { code: 'DMT', name: { ar: 'دمياط', en: 'Damietta', fr: 'Damiette' } },
+        { code: 'PTS', name: { ar: 'بورسعيد', en: 'Port Said', fr: 'Port-Saïd' } },
+        { code: 'ISM', name: { ar: 'الإسماعيلية', en: 'Ismailia', fr: 'Ismaïlia' } },
+        { code: 'SUZ', name: { ar: 'السويس', en: 'Suez', fr: 'Suez' } },
+        { code: 'NSR', name: { ar: 'شمال سيناء', en: 'North Sinai', fr: 'Sinaï du Nord' } },
+        { code: 'SSR', name: { ar: 'جنوب سيناء', en: 'South Sinai', fr: 'Sinaï du Sud' } },
+        { code: 'FYM', name: { ar: 'الفيوم', en: 'Fayoum', fr: 'Fayoum' } },
+        { code: 'BNS', name: { ar: 'بني سويف', en: 'Beni Suef', fr: 'Beni Suef' } },
+        { code: 'MNA', name: { ar: 'المنيا', en: 'Minya', fr: 'Minya' } },
+        { code: 'AST', name: { ar: 'أسيوط', en: 'Asyut', fr: 'Assiout' } },
+        { code: 'SHG', name: { ar: 'سوهاج', en: 'Sohag', fr: 'Sohag' } },
+        { code: 'QNA', name: { ar: 'قنا', en: 'Qena', fr: 'Qena' } },
+        { code: 'LXR', name: { ar: 'الأقصر', en: 'Luxor', fr: 'Louxor' } },
+        { code: 'ASW', name: { ar: 'أسوان', en: 'Aswan', fr: 'Assouan' } },
+        { code: 'BSE', name: { ar: 'البحر الأحمر', en: 'Red Sea', fr: 'Mer Rouge' } },
+        { code: 'WAD', name: { ar: 'الوادي الجديد', en: 'New Valley', fr: 'Nouvelle Vallée' } },
+        { code: 'MAT', name: { ar: 'مطروح', en: 'Matrouh', fr: 'Matruh' } }
+      ]
+    },
+    'SA': {
+      name: { ar: 'السعودية', en: 'Saudi Arabia', fr: 'Arabie Saoudite' },
+      governorates: [
+        { code: 'RYD', name: { ar: 'الرياض', en: 'Riyadh', fr: 'Riyad' } },
+        { code: 'MKK', name: { ar: 'مكة المكرمة', en: 'Makkah', fr: 'La Mecque' } },
+        { code: 'MDN', name: { ar: 'المدينة المنورة', en: 'Madinah', fr: 'Médine' } },
+        { code: 'EAS', name: { ar: 'الشرقية', en: 'Eastern Province', fr: 'Province orientale' } },
+        { code: 'ASR', name: { ar: 'عسير', en: 'Asir', fr: 'Assir' } },
+        { code: 'TAB', name: { ar: 'تبوك', en: 'Tabuk', fr: 'Tabouk' } },
+        { code: 'HAL', name: { ar: 'حائل', en: 'Hail', fr: 'Haïtl' } },
+        { code: 'NRN', name: { ar: 'الحدود الشمالية', en: 'Northern Borders', fr: 'Frontières du Nord' } },
+        { code: 'JZN', name: { ar: 'جازان', en: 'Jazan', fr: 'Jizan' } },
+        { code: 'NJR', name: { ar: 'نجران', en: 'Najran', fr: 'Najran' } },
+        { code: 'BAH', name: { ar: 'الباحة', en: 'Al Bahah', fr: 'Al Bahah' } },
+        { code: 'JOF', name: { ar: 'الجوف', en: 'Al Jouf', fr: 'Al Jawf' } },
+        { code: 'QSM', name: { ar: 'القصيم', en: 'Al Qassim', fr: 'Al Qassim' } }
+      ]
+    },
+    'AE': {
+      name: { ar: 'الإمارات', en: 'UAE', fr: 'Émirats Arabes Unis' },
+      governorates: [
+        { code: 'AUH', name: { ar: 'أبو ظبي', en: 'Abu Dhabi', fr: 'Abou Dabi' } },
+        { code: 'DXB', name: { ar: 'دبي', en: 'Dubai', fr: 'Dubaï' } },
+        { code: 'SHJ', name: { ar: 'الشارقة', en: 'Sharjah', fr: 'Charjah' } },
+        { code: 'AJM', name: { ar: 'عجمان', en: 'Ajman', fr: 'Ajman' } },
+        { code: 'UAQ', name: { ar: 'أم القيوين', en: 'Umm Al Quwain', fr: 'Oumm al Qaïwaïn' } },
+        { code: 'RAK', name: { ar: 'رأس الخيمة', en: 'Ras Al Khaimah', fr: 'Ras el Khaïmah' } },
+        { code: 'FUJ', name: { ar: 'الفجيرة', en: 'Fujairah', fr: 'Foujairah' } }
+      ]
+    }
+  };
+
+  // بيانات المراحل التعليمية
+  const educationLevels = {
+    'middle': {
+      name: { ar: 'إعدادي', en: 'Middle School', fr: 'Collège' },
+      grades: [
+        { code: '7', name: { ar: 'الصف الأول الإعدادي', en: '7th Grade', fr: '5ème' } },
+        { code: '8', name: { ar: 'الصف الثاني الإعدادي', en: '8th Grade', fr: '4ème' } },
+        { code: '9', name: { ar: 'الصف الثالث الإعدادي', en: '9th Grade', fr: '3ème' } }
+      ]
+    },
+    'high': {
+      name: { ar: 'ثانوي', en: 'High School', fr: 'Lycée' },
+      grades: [
+        { code: '10', name: { ar: 'الصف الأول الثانوي', en: '10th Grade', fr: 'Seconde' } },
+        { code: '11', name: { ar: 'الصف الثاني الثانوي', en: '11th Grade', fr: 'Première' } },
+        { code: '12', name: { ar: 'الصف الثالث الثانوي', en: '12th Grade', fr: 'Terminale' } }
+      ]
+    },
+    'university': {
+      name: { ar: 'جامعي', en: 'University', fr: 'Université' },
+      grades: [
+        { code: '1', name: { ar: 'السنة الأولى', en: '1st Year', fr: '1ère année' } },
+        { code: '2', name: { ar: 'السنة الثانية', en: '2nd Year', fr: '2ème année' } },
+        { code: '3', name: { ar: 'السنة الثالثة', en: '3rd Year', fr: '3ème année' } },
+        { code: '4', name: { ar: 'السنة الرابعة', en: '4th Year', fr: '4ème année' } },
+        { code: '5', name: { ar: 'السنة الخامسة', en: '5th Year', fr: '5ème année' } },
+        { code: '6', name: { ar: 'السنة السادسة', en: '6th Year', fr: '6ème année' } }
+      ]
+    },
+    'graduate': {
+      name: { ar: 'خريج', en: 'Graduate', fr: 'Diplômé' },
+      grades: [
+        { code: 'recent', name: { ar: 'خريج حديث (0-2 سنة)', en: 'Recent Graduate (0-2 years)', fr: 'Diplômé récent (0-2 ans)' } },
+        { code: 'experienced', name: { ar: 'خريج ذو خبرة (2+ سنوات)', en: 'Experienced Graduate (2+ years)', fr: 'Diplômé expérimenté (2+ ans)' } }
+      ]
+    }
+  };
+
+  // اللغات المتاحة
+  const languages = {
+    ar: { name: 'العربية', dir: 'rtl' },
+    en: { name: 'English', dir: 'ltr' },
+    fr: { name: 'Français', dir: 'ltr' }
+  };
+
+  // النص بالثلاث لغات
+  const getText = (key) => {
+    const translations = {
+      ar: {
+        // العناوين الرئيسية
+        title: 'إنشاء حساب جديد',
+        subtitle: 'انضم إلينا واكتشف مسارك المهني المثالي',
+        
+        // البيانات الشخصية
+        personalInfo: 'البيانات الشخصية',
+        fullName: 'الاسم الكامل',
+        email: 'البريد الإلكتروني',
+        phone: 'رقم الهاتف',
+        birthDate: 'تاريخ الميلاد',
+        gender: 'الجنس',
+        male: 'ذكر',
+        female: 'أنثى',
+        
+        // البيانات الجغرافية
+        locationInfo: 'البيانات الجغرافية',
+        country: 'البلد',
+        governorate: 'المحافظة',
+        city: 'المدينة',
+        
+        // البيانات التعليمية
+        educationInfo: 'البيانات التعليمية',
+        educationLevel: 'المرحلة الدراسية',
+        currentGrade: 'الصف الحالي',
+        school: 'المدرسة/الجامعة',
+        specialization: 'التخصص',
+        
+        // كلمة المرور
+        password: 'كلمة المرور',
+        confirmPassword: 'تأكيد كلمة المرور',
+        
+        // اللغة
+        preferredLanguage: 'اللغة المفضلة',
+        
+        // الأزرار
+        createAccount: 'إنشاء الحساب',
+        login: 'تسجيل الدخول',
+        
+        // النصوص الأخرى
+        alreadyHaveAccount: 'لديك حساب بالفعل؟',
+        agreeToTerms: 'أوافق على',
+        termsOfService: 'شروط الاستخدام',
+        privacyPolicy: 'سياسة الخصوصية',
+        and: 'و',
+        
+        // Placeholders
+        enterName: 'أدخل اسمك الكامل',
+        enterEmail: 'أدخل بريدك الإلكتروني',
+        enterPhone: 'أدخل رقم هاتفك',
+        enterPassword: 'أدخل كلمة المرور',
+        reenterPassword: 'أعد كتابة كلمة المرور',
+        enterSchool: 'أدخل اسم المدرسة/الجامعة',
+        enterSpecialization: 'أدخل تخصصك',
+        enterCity: 'أدخل اسم مدينتك',
+        
+        // خيارات القوائم
+        selectCountry: 'اختر البلد',
+        selectGovernorate: 'اختر المحافظة',
+        selectEducationLevel: 'اختر المرحلة الدراسية',
+        selectGrade: 'اختر الصف',
+        selectGender: 'اختر الجنس',
+        selectLanguage: 'اختر اللغة المفضلة'
+      },
+      en: {
+        // Main titles
+        title: 'Create New Account',
+        subtitle: 'Join us and discover your ideal career path',
+        
+        // Personal data
+        personalInfo: 'Personal Information',
+        fullName: 'Full Name',
+        email: 'Email Address',
+        phone: 'Phone Number',
+        birthDate: 'Date of Birth',
+        gender: 'Gender',
+        male: 'Male',
+        female: 'Female',
+        
+        // Location data
+        locationInfo: 'Location Information',
+        country: 'Country',
+        governorate: 'Governorate/State',
+        city: 'City',
+        
+        // Education data
+        educationInfo: 'Educational Information',
+        educationLevel: 'Education Level',
+        currentGrade: 'Current Grade',
+        school: 'School/University',
+        specialization: 'Specialization',
+        
+        // Password
+        password: 'Password',
+        confirmPassword: 'Confirm Password',
+        
+        // Language
+        preferredLanguage: 'Preferred Language',
+        
+        // Buttons
+        createAccount: 'Create Account',
+        login: 'Login',
+        
+        // Other texts
+        alreadyHaveAccount: 'Already have an account?',
+        agreeToTerms: 'I agree to the',
+        termsOfService: 'Terms of Service',
+        privacyPolicy: 'Privacy Policy',
+        and: 'and',
+        
+        // Placeholders
+        enterName: 'Enter your full name',
+        enterEmail: 'Enter your email address',
+        enterPhone: 'Enter your phone number',
+        enterPassword: 'Enter password',
+        reenterPassword: 'Re-enter password',
+        enterSchool: 'Enter school/university name',
+        enterSpecialization: 'Enter your specialization',
+        enterCity: 'Enter your city name',
+        
+        // Select options
+        selectCountry: 'Select Country',
+        selectGovernorate: 'Select Governorate/State',
+        selectEducationLevel: 'Select Education Level',
+        selectGrade: 'Select Grade',
+        selectGender: 'Select Gender',
+        selectLanguage: 'Select Preferred Language'
+      },
+      fr: {
+        // Titres principaux
+        title: 'Créer un Nouveau Compte',
+        subtitle: 'Rejoignez-nous et découvrez votre parcours professionnel idéal',
+        
+        // Données personnelles
+        personalInfo: 'Informations Personnelles',
+        fullName: 'Nom Complet',
+        email: 'Adresse Email',
+        phone: 'Numéro de Téléphone',
+        birthDate: 'Date de Naissance',
+        gender: 'Sexe',
+        male: 'Homme',
+        female: 'Femme',
+        
+        // Données de localisation
+        locationInfo: 'Informations de Localisation',
+        country: 'Pays',
+        governorate: 'Gouvernorat/État',
+        city: 'Ville',
+        
+        // Données éducatives
+        educationInfo: 'Informations Éducatives',
+        educationLevel: 'Niveau d\'Éducation',
+        currentGrade: 'Classe Actuelle',
+        school: 'École/Université',
+        specialization: 'Spécialisation',
+        
+        // Mot de passe
+        password: 'Mot de Passe',
+        confirmPassword: 'Confirmer le Mot de Passe',
+        
+        // Langue
+        preferredLanguage: 'Langue Préférée',
+        
+        // Boutons
+        createAccount: 'Créer un Compte',
+        login: 'Se Connecter',
+        
+        // Autres textes
+        alreadyHaveAccount: 'Vous avez déjà un compte?',
+        agreeToTerms: 'J\'accepte les',
+        termsOfService: 'Conditions d\'Utilisation',
+        privacyPolicy: 'Politique de Confidentialité',
+        and: 'et',
+        
+        // Placeholders
+        enterName: 'Entrez votre nom complet',
+        enterEmail: 'Entrez votre adresse email',
+        enterPhone: 'Entrez votre numéro de téléphone',
+        enterPassword: 'Entrez le mot de passe',
+        reenterPassword: 'Ressaisissez le mot de passe',
+        enterSchool: 'Entrez le nom de l\'école/université',
+        enterSpecialization: 'Entrez votre spécialisation',
+        enterCity: 'Entrez le nom de votre ville',
+        
+        // Options de sélection
+        selectCountry: 'Sélectionner le Pays',
+        selectGovernorate: 'Sélectionner le Gouvernorat/État',
+        selectEducationLevel: 'Sélectionner le Niveau d\'Éducation',
+        selectGrade: 'Sélectionner la Classe',
+        selectGender: 'Sélectionner le Sexe',
+        selectLanguage: 'Sélectionner la Langue Préférée'
+      }
+    };
+    
+    return translations[formData.preferredLanguage]?.[key] || translations.ar[key] || key;
+  };
+
+  // دالة للحصول على المحافظات حسب البلد المختار
+  const getGovernorates = () => {
+    if (!formData.country) return [];
+    return countries[formData.country]?.governorates || [];
+  };
+
+  // دالة للحصول على الصفوف حسب المرحلة التعليمية
+  const getGrades = () => {
+    if (!formData.educationLevel) return [];
+    return educationLevels[formData.educationLevel]?.grades || [];
+  };
+
+  // دالة للتعامل مع تغيير القيم
   const handleInputChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    })
-  }
+    const { name, value } = e.target;
+    
+    setFormData(prev => {
+      const newData = { ...prev, [name]: value };
+      
+      // إذا تغير البلد، مسح المحافظة
+      if (name === 'country') {
+        newData.governorate = '';
+      }
+      
+      // إذا تغيرت المرحلة التعليمية، مسح الصف
+      if (name === 'educationLevel') {
+        newData.currentGrade = '';
+      }
+      
+      return newData;
+    });
+  };
 
   const handleSignup = async (e) => {
     e.preventDefault()
@@ -36,19 +391,43 @@ export default function Signup() {
 
     setIsLoading(true)
     
-    // محاكاة عملية إنشاء الحساب
+    // محاكاة عملية إنشاء الحساب مع بيانات شاملة
     setTimeout(() => {
       // حفظ بيانات المستخدم في localStorage
       const userData = {
+        // البيانات الشخصية
         name: formData.name,
         email: formData.email,
-        token: 'fake-jwt-token',
-        age: formData.age,
+        phone: formData.phone,
+        birthDate: formData.birthDate,
         gender: formData.gender,
-        education: formData.education
+        
+        // البيانات الجغرافية
+        country: formData.country,
+        countryName: countries[formData.country]?.name[formData.preferredLanguage] || '',
+        governorate: formData.governorate,
+        governorateName: countries[formData.country]?.governorates.find(g => g.code === formData.governorate)?.name[formData.preferredLanguage] || '',
+        city: formData.city,
+        
+        // البيانات التعليمية
+        educationLevel: formData.educationLevel,
+        educationLevelName: educationLevels[formData.educationLevel]?.name[formData.preferredLanguage] || '',
+        currentGrade: formData.currentGrade,
+        currentGradeName: educationLevels[formData.educationLevel]?.grades.find(g => g.code === formData.currentGrade)?.name[formData.preferredLanguage] || '',
+        school: formData.school,
+        specialization: formData.specialization,
+        
+        // بيانات أخرى
+        preferredLanguage: formData.preferredLanguage,
+        registrationDate: new Date().toISOString(),
+        token: 'school2career_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9)
       }
+      
       localStorage.setItem('userData', JSON.stringify(userData))
       localStorage.setItem('userToken', userData.token)
+      localStorage.setItem('userLanguage', formData.preferredLanguage)
+      
+      console.log('تم حفظ بيانات المستخدم:', userData)
       
       setIsLoading(false)
       router.push('/dashboard')
