@@ -513,23 +513,35 @@ const RIASECInternationalResults = ({
   // Fetch recommendations
   useEffect(() => {
     const fetchRecommendations = async () => {
-      if (!holland_code) return;
+      if (!holland_code) {
+        console.log('❌ No holland_code available');
+        return;
+      }
       
+      console.log('🚀 Fetching recommendations for:', holland_code);
       setLoadingRecommendations(true);
+      
       try {
-        const response = await fetch(
-          `/api/assessments/riasec/recommendations?code=${holland_code}&region=Egypt&level=High`
-        );
+        const url = `/api/assessments/riasec/recommendations?code=${holland_code}&region=Egypt&level=Work`;
+        console.log('📡 API URL:', url);
+        
+        const response = await fetch(url);
+        console.log('📊 Response status:', response.status);
+        console.log('📊 Response ok:', response.ok);
         
         if (response.ok) {
           const data = await response.json();
+          console.log('✅ API Response data:', data);
           setRecommendations(data.recommendations);
           console.log('✅ تم جلب التوصيات:', data.recommendations);
         } else {
-          console.error('❌ فشل جلب التوصيات');
+          const errorText = await response.text();
+          console.error('❌ فشل جلب التوصيات - Status:', response.status);
+          console.error('❌ Error response:', errorText);
         }
       } catch (error) {
         console.error('❌ خطأ في جلب التوصيات:', error);
+        console.error('❌ Error details:', error.message);
       } finally {
         setLoadingRecommendations(false);
       }
