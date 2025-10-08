@@ -218,33 +218,27 @@ class RIASECInternational {
 
   // اختيار الكود الثلاثي وفق International rules
   chooseTriad(sortedByRaw, zMap, opts) {
-    const lambda = opts.lambda ?? this.defaults.lambda;
-    const sdGate = opts.sdGate ?? this.defaults.sdGate;
-
-    const top4 = sortedByRaw.slice(0,4).map(([t])=>t);
-    const triads = this.buildTriads(top4);
-
-    // لو في زوج متقابل (distance=3)، لا نقبل إلا لو أعلى نوع يتجاوز التالي بـ sdGate SD
-    const topZ = zMap[top4[0]];
-    const secondZ = zMap[sortedByRaw[1][0]];
-    const strongLead = (topZ - secondZ) >= sdGate;
-
-    const candidates = [];
-    for (const tri of triads) {
-      if (this.hasOppositePair(tri) && !strongLead) continue; // فلترة صارمة
-      candidates.push(this.scoreTriad(tri, zMap, lambda));
-    }
-
-    if (candidates.length===0) {
-      // إن اتفلترت كلها، نخفف الشرط ونسمح بالأقرب
-      for (const tri of triads) candidates.push(this.scoreTriad(tri, zMap, lambda+0.1));
-    }
-
-    // أعلى Score، ثم تفاضل أعلى، ثم أعلى نوع
-    candidates.sort((a,b)=> b.score - a.score);
-    const best = candidates[0];
-
-    // روابط إضافية للمقارنة
+    // نظام مبسط: نأخذ أعلى 3 أنواع مباشرة بدون أي فلترة
+    // جميع الـ 120 كود متاحين بدون استبعاد
+    
+    const top3 = sortedByRaw.slice(0, 3).map(([t]) => t);
+    const hollandCode = top3.join('');
+    
+    // حساب معلومات الكود للعرض
+    const zSum = top3.reduce((sum, t) => sum + zMap[t], 0);
+    const consistency = this.calcConsistency(hollandCode);
+    
+    const best = {
+      code: hollandCode,
+      types: top3,
+      score: zSum,
+      consistency: consistency.score,
+      explanation: `الكود ${hollandCode} تم اختياره بناءً على أعلى 3 درجات مباشرة`
+    };
+    
+    // إنشاء قائمة candidates للتوافق مع الكود القديم
+    const candidates = [best];
+    
     return { best, candidates };
   }
 
