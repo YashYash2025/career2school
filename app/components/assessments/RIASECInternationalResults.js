@@ -28,6 +28,7 @@ import {
 import * as d3 from 'd3';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
+import SaveResultsButton from './SaveResultsButton';
 
 // Register Chart.js components
 ChartJS.register(
@@ -3694,6 +3695,17 @@ const RIASECInternationalResults = ({
           marginTop: '50px',
           flexWrap: 'wrap'
         }}>
+          {/* Save Results Button */}
+          <SaveResultsButton 
+            algorithmResults={algorithmResults}
+            onSaveSuccess={(result) => {
+              console.log('✅ تم حفظ النتائج:', result);
+            }}
+            onSaveError={(error) => {
+              console.error('❌ خطأ في حفظ النتائج:', error);
+            }}
+          />
+          
           <button
             onClick={onRetakeAssessment}
             style={{
