@@ -271,7 +271,8 @@ class RIASECInternational {
 
     // تحديد عدد الأسئلة لكل نوع بناءً على النسخة
     const questionsPerType = this.getQuestionsPerType(responses);
-    const maxScore = questionsPerType * 2; // أقصى درجة لكل نوع
+    // في نظام [0,0,1]: كل سؤال = 1 نقطة كحد أقصى (مش 2)
+    const maxScore = questionsPerType; // أقصى درجة لكل نوع
     
     console.log('📈 أسئلة لكل نوع:', questionsPerType);
     console.log('🎯 أقصى درجة لكل نوع:', maxScore);
