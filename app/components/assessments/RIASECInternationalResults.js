@@ -2555,7 +2555,16 @@ const RIASECInternationalResults = ({
     const svgRef = useRef(null);
     
     useEffect(() => {
-      if (!svgRef.current || !raw_scores) return;
+      console.log('🎨 RadarChartD3: Rendering');
+      console.log('📊 svgRef.current:', svgRef.current);
+      console.log('📊 raw_scores:', raw_scores);
+      
+      if (!svgRef.current || !raw_scores) {
+        console.log('❌ RadarChartD3: Missing data');
+        return;
+      }
+      
+      console.log('✅ RadarChartD3: Drawing chart');
       
       // Clear previous chart
       d3.select(svgRef.current).selectAll("*").remove();
@@ -3404,6 +3413,11 @@ const RIASECInternationalResults = ({
 
   // Recommendations Tab Component
   const RecommendationsTab = () => {
+    console.log('🎯 RecommendationsTab: Rendering');
+    console.log('📊 loadingRecommendations:', loadingRecommendations);
+    console.log('📋 recommendations:', recommendations);
+    console.log('🔤 holland_code:', holland_code);
+    
     if (loadingRecommendations) {
       return (
         <div style={{ textAlign: 'center', padding: '60px', color: '#a8a8b8' }}>
@@ -3502,10 +3516,15 @@ const RIASECInternationalResults = ({
           
           {(() => {
             // استخراج الوظائف من النص
+            console.log('📋 recommendations.recommendations_ar:', recommendations.recommendations_ar);
+            
             const jobs = recommendations.recommendations_ar
               .split(/[؛;]/)
               .map(j => j.trim())
               .filter(j => j.length > 0);
+            
+            console.log('✅ عدد الوظائف المستخرجة:', jobs.length);
+            console.log('📋 الوظائف:', jobs);
             
             // حساب نسبة المطابقة بناءً على ترتيب الكود
             const codeLetters = recommendations.holland_code.split('');
