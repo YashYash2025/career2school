@@ -5,7 +5,11 @@
  * Mode: International (strict adjacency; bans opposite pairs unless strong evidence)
  * 
  * Inputs:
- *  - responses: Object of items with values {0,1,2}, e.g. { "R1":2, "R2":1, ..., "C30":0 }
+ *  - responses: Object of items with values {0,1}, e.g. { "R1":1, "R2":0, ..., "C30":1 }
+ *    Scoring System [0, 0, 1]:
+ *      0 = "لا أحب" (No interest)
+ *      0 = "محايد" (Neutral)  
+ *      1 = "أحب" (Like)
  *  - opts:
  *      country: 'international' | 'egypt' | 'saudi'   // norms set
  *      version: 'full' | 'medium' | 'short'          // to softly de-noise shorter forms
@@ -14,7 +18,7 @@
  * 
  * Output:
  *  - Detailed scoring object with:
- *      raw_scores[type] = { raw, percentage, z, percentile, liked, stronglyLiked, subdomains, interpretation }
+ *      raw_scores[type] = { raw, percentage, z, percentile, liked, subdomains, interpretation }
  *      holland_code (chosen triad, e.g., "RIA")
  *      triad_details (all candidate triads with scores/explanations)
  *      indices: differentiation, consistency, congruence, profile_elevation
@@ -277,7 +281,7 @@ class RIASECInternational {
     console.log('🎚️ بداية حساب درجات النوع لكل RIASEC type...');
     
     for (const t of this.types) {
-      let raw = 0, liked=[], strong=[];
+      let raw = 0, liked = [];
       
       console.log(`\n⚙️ حساب نوع ${t}:`);
       
@@ -289,9 +293,12 @@ class RIASECInternational {
         if (key.startsWith(t)) {
           const v = responses[key] ?? 0;
           console.log(`    ${key}: ${v}`);
-          raw += v;
-          if (v===1) liked.push(key);
-          else if (v===2) strong.push(key);
+          // نظام [0, 0, 1]: فقط "أحب" = 1 يضيف للدرجة
+          if (v === 1) {
+            raw += 1;
+            liked.push(key);
+          }
+          // v === 0 يعني "لا أحب" أو "محايد" - لا يضيف شيء
         }
       });
       
@@ -306,7 +313,7 @@ class RIASECInternational {
       
       typeMap[t] = {
         raw, percentage, z, percentile,
-        liked, stronglyLiked: strong,
+        liked, // فقط "أحب" في نظام [0, 0, 1]
         subdomains: sub,
         interpretation: this.interpret(percentage, t),
       };

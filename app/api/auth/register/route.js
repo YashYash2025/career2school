@@ -1,197 +1,171 @@
-import { createClient } from '@supabase/supabase-js';
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server'
+import { createClient } from '@supabase/supabase-js'
 
-// Create Supabase client
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Missing Supabase environment variables');
-}
-
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
+const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
 export async function POST(request) {
   try {
-    const body = await request.json();
-
     const {
       email,
       password,
-      firstName,
-      lastName,
-      birthDate,
+      first_name,
+      last_name,
       phone,
+      birth_date,
       gender,
-      country,
-      governorate,
+      country_code,
+      governorate_code,
       city,
-      educationLevel,
-      currentGrade,
-      schoolName,
+      education_level_code,
+      current_grade_code,
+      school_name,
       specialization,
-      preferredLanguage = 'ar'
-    } = body;
+      preferred_language,
+      user_type
+    } = await request.json()
 
-    // Validate required fields
-    if (!email || !password || !firstName || !lastName) {
-      return NextResponse.json(
-        { error: 'البيانات المطلوبة مفقودة - Required fields missing' },
-        { status: 400 }
-      );
-    }
-
-    // 1. Create user account
-    const { data: authData, error: authError } = await supabase.auth.signUp({
+    console.log('📝 Registration data received:', {
       email,
-      password,
-      options: {
-        data: {
-          first_name: firstName,
-          last_name: lastName,
-          preferred_language: preferredLanguage,
-        }
-      }
-    });
+      first_name,
+      last_name,
+      phone,
+      birth_date,
+      gender,
+      country_code,
+      governorate_code,
+      city,
+      education_level_code,
+      current_grade_code,
+      school_name,
+      specialization,
+      preferred_language,
+      user_type
+    })
 
-    if (authError) {
-      console.error('Auth error:', authError);
+    // التحقق من البيانات المطلوبة
+    if (!email || !password || !first_name || !last_name) {
       return NextResponse.json(
-        { error: `خطأ في إنشاء الحساب - Authentication error: ${authError.message}` },
+        { error: 'البيانات الأساسية مطلوبة (الإيميل، كلمة المرور، الاسم الأول، الاسم الأخير)' },
         { status: 400 }
-      );
-    }
-
-    const userId = authData.user?.id;
-    if (!userId) {
-      return NextResponse.json(
-        { error: 'فشل في الحصول على معرف المستخدم - Failed to get user ID' },
-        { status: 500 }
-      );
-    }
-
-    // 2. Create user profile with only existing columns
-    const profileData = {
-      id: userId,
-      email,
-      first_name: firstName,
-      last_name: lastName,
-      // Only include fields that exist in current user_profiles table structure
-      // Additional fields will be stored when database is updated
-    }
-
-    // Store additional data in user metadata for now
-    const additionalData = {
-      birth_date: birthDate,
-      phone: phone,
-      gender: gender,
-      country_code: country?.code,
-      country_name: country?.name,
-      governorate_code: governorate?.code,
-      governorate_name: governorate?.name,
-      city: city,
-      education_level_code: educationLevel?.code,
-      education_level_name: educationLevel?.name,
-      current_grade_code: currentGrade?.code,
-      current_grade_name: currentGrade?.name,
-      school_name: schoolName,
-      specialization: specialization,
-      preferred_language: preferredLanguage,
-      registration_date: new Date().toISOString(),
-    };
-
-    // Try to insert with enhanced profile first, fallback to basic profile
-    let profile;
-    try {
-      // Try enhanced profile with all fields
-      const enhancedProfileData = { ...profileData, ...additionalData }
-      const { data: enhancedProfile, error: enhancedError } = await supabase
-        .from('user_profiles')
-        .insert([enhancedProfileData])
-        .select()
-        .single()
-      
-      if (enhancedError) {
-        // Fallback to basic profile if enhanced fails
-        console.log('Enhanced profile failed, using basic profile:', enhancedError.message)
-        const { data: basicProfile, error: basicError } = await supabase
-          .from('user_profiles')
-          .insert([profileData])
-          .select()
-          .single()
-        
-        if (basicError) throw basicError
-        profile = { ...basicProfile, ...additionalData } // Include additional data in response
-      } else {
-        profile = enhancedProfile
-      }
-    } catch (insertError) {
-      console.error('Profile creation error:', insertError)
-      
-      // If profile creation fails, we should clean up the auth user
-      console.error('User created but profile failed. Manual cleanup may be needed for user:', userId)
-      
-      return NextResponse.json(
-        { error: `خطأ في إنشاء الملف الشخصي - Profile creation error: ${insertError.message}` },
-        { status: 500 }
       )
     }
 
-    // 3. Return success response
-    return NextResponse.json({
-      success: true,
-      message: 'تم إنشاء الحساب بنجاح - Account created successfully',
-      user: {
-        id: userId,
-        email: authData.user.email,
-        profile: profile
-      }
-    }, { status: 201 });
+    console.log('🔐 Creating user account...')
+    // إنشاء حساب المستخدم في Supabase Auth
+    const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+      email,
+      password,
+      email_confirm: true // تأكيد الإيميل تلقائياً
+    })
 
-  } catch (error) {
-    console.error('Registration error:', error);
-    return NextResponse.json(
-      { error: `خطأ في الخادم - Server error: ${error.message}` },
-      { status: 500 }
-    );
-  }
-}
-
-export async function GET(request) {
-  try {
-    const { searchParams } = new URL(request.url);
-    const userId = searchParams.get('userId');
-
-    if (!userId) {
+    if (authError) {
+      console.error('❌ Auth error:', authError)
       return NextResponse.json(
-        { error: 'معرف المستخدم مطلوب - User ID required' },
+        { error: `خطأ في إنشاء الحساب: ${authError.message}` },
         { status: 400 }
-      );
+      )
     }
 
-    const { data: profile, error } = await supabase
+    console.log('✅ User account created:', authData.user.id)
+
+    console.log('👤 Creating user profile with new table structure...')
+    
+    // تحديد نوع المستخدم بناءً على المرحلة التعليمية والصف
+    const determineUserType = (educationLevel, currentGrade) => {
+      console.log('📋 تحديد نوع المستخدم - المرحلة:', educationLevel, 'الصف:', currentGrade)
+      
+      if (educationLevel === 'graduate') {
+        // استخدم 'student' مؤقتاً لحد ما يتم تحديث قاعدة البيانات
+        return 'student' // مؤقت - سيتم تحديثه لاحقاً
+      } else if (educationLevel === 'university') {
+        return 'student' // طالب جامعي
+      } else if (educationLevel === 'high' || educationLevel === 'middle') {
+        return 'student' // طالب مدرسة
+      } else {
+        return 'student' // default
+      }
+    }
+    
+    const finalUserType = user_type || determineUserType(education_level_code, current_grade_code)
+    console.log('🏷️ نوع المستخدم النهائي:', finalUserType)
+    
+    // إنشاء الملف الشخصي باستخدام الجدول الجديد
+    // إنشاء الملف الشخصي باستخدام الجدول الجديد
+    const profileData = {
+      user_id: authData.user.id,
+      email,
+      first_name,
+      last_name,
+      phone: phone || null,
+      birth_date: birth_date || null,
+      gender: gender || null,
+      country_code: country_code || null,
+      governorate_code: governorate_code || null,
+      city: city || null,
+      education_level_code: education_level_code || null,
+      current_grade_code: current_grade_code || null,
+      school_name: school_name || null,
+      specialization: specialization || null,
+      preferred_language: preferred_language || 'ar',
+      user_type: finalUserType,
+      is_active: true
+    }
+    
+    // إضافة معلومات للاستخدام المستقبلي في bio
+    if (education_level_code === 'graduate' && current_grade_code === 'exp') {
+      profileData.bio = 'خريج ذو خبرة (أكثر من سنتين)';
+    } else if (education_level_code === 'graduate' && current_grade_code === 'recent') {
+      profileData.bio = 'خريج حديث (0-2 سنة)';
+    }
+
+    console.log('📋 Profile data to insert:', profileData)
+
+    const { data: insertedProfile, error: profileError } = await supabase
       .from('user_profiles')
-      .select('*')
-      .eq('id', userId)
-      .single();
+      .insert(profileData)
+      .select()
+      .single()
 
-    if (error) {
+    if (profileError) {
+      console.error('❌ Profile creation error:', profileError)
+      console.error('Error details:', JSON.stringify(profileError, null, 2))
+      
+      // حذف المستخدم من Auth إذا فشل إنشاء الملف الشخصي
+      await supabase.auth.admin.deleteUser(authData.user.id)
+      
       return NextResponse.json(
-        { error: `خطأ في جلب البيانات - Error fetching profile: ${error.message}` },
-        { status: 404 }
-      );
+        { 
+          error: `خطأ في إنشاء الملف الشخصي: ${profileError.message}`,
+          details: profileError
+        },
+        { status: 400 }
+      )
     }
+
+    console.log('✅ User profile created successfully:', insertedProfile)
 
     return NextResponse.json({
       success: true,
-      profile
-    });
+      message: 'تم إنشاء الحساب بنجاح',
+      user: {
+        id: authData.user.id,
+        email: authData.user.email,
+        profile: insertedProfile
+      }
+    })
 
   } catch (error) {
-    console.error('Get profile error:', error);
+    console.error('💥 Registration error:', error)
+    console.error('Error details:', JSON.stringify(error, null, 2))
     return NextResponse.json(
-      { error: `خطأ في الخادم - Server error: ${error.message}` },
+      { 
+        error: `خطأ في التسجيل: ${error.message}`,
+        details: error
+      },
       { status: 500 }
-    );
+    )
   }
 }

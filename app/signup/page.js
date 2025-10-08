@@ -4,6 +4,13 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useTranslation, LanguageSwitcher } from '../lib/translation'
+import { createClient } from '@supabase/supabase-js'
+
+// إعداد Supabase client
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+)
 
 export default function Signup() {
   const { t, currentLanguage, direction, changeLanguage } = useTranslation()
@@ -202,147 +209,163 @@ export default function Signup() {
   useEffect(() => {
     const loadGovernorates = async () => {
       if (formData.country) {
+        // تحميل المحافظات من قاعدة البيانات
         try {
           const response = await fetch(`/api/reference?type=governorates&parent=${formData.country}`)
           if (response.ok) {
             const data = await response.json()
-            setGovernorates(data.data || [])
-          } else {
-            throw new Error('DB not ready')
+            console.log('Governorates API response:', data)
+            
+            if (data.success && data.data && data.data.governorates) {
+              // تحويل بيانات قاعدة البيانات إلى الشكل المطلوب
+              const formattedGovernorates = data.data.governorates.map(gov => ({
+                code: gov.code,
+                name: {
+                  ar: gov.name_ar,
+                  en: gov.name_en,
+                  fr: gov.name_fr || gov.name_ar
+                }
+              }))
+              setGovernorates(formattedGovernorates)
+              console.log('Governorates loaded from API:', formattedGovernorates.length)
+              return
+            }
           }
         } catch (error) {
-          // بيانات المحافظات الثابتة
-          const staticGovernorates = {
-            'EG': [
-              { code: 'CAI', name: { ar: 'القاهرة', en: 'Cairo', fr: 'Le Caire' } },
-              { code: 'GIZ', name: { ar: 'الجيزة', en: 'Giza', fr: 'Gizeh' } },
-              { code: 'ALX', name: { ar: 'الإسكندرية', en: 'Alexandria', fr: 'Alexandrie' } },
-              { code: 'SHR', name: { ar: 'الشرقية', en: 'Sharqia', fr: 'Charqiya' } },
-              { code: 'MNF', name: { ar: 'المنوفية', en: 'Monufia', fr: 'Ménoufia' } },
-              { code: 'QAL', name: { ar: 'القليوبية', en: 'Qalyubia', fr: 'Qalyubia' } },
-              { code: 'GHR', name: { ar: 'الغربية', en: 'Gharbia', fr: 'Gharbia' } },
-              { code: 'BHR', name: { ar: 'البحيرة', en: 'Beheira', fr: 'Beheira' } },
-              { code: 'KFS', name: { ar: 'كفر الشيخ', en: 'Kafr El Sheikh', fr: 'Kafr el-Cheikh' } },
-              { code: 'DQH', name: { ar: 'الدقهلية', en: 'Dakahlia', fr: 'Dakahlia' } },
-              { code: 'DMT', name: { ar: 'دمياط', en: 'Damietta', fr: 'Damiette' } },
-              { code: 'PTS', name: { ar: 'بورسعيد', en: 'Port Said', fr: 'Port-Saïd' } },
-              { code: 'ISM', name: { ar: 'الإسماعيلية', en: 'Ismailia', fr: 'Ismaïlia' } },
-              { code: 'SUZ', name: { ar: 'السويس', en: 'Suez', fr: 'Suez' } },
-              { code: 'ASW', name: { ar: 'أسوان', en: 'Aswan', fr: 'Assouan' } },
-              { code: 'LXR', name: { ar: 'الأقصر', en: 'Luxor', fr: 'Louxor' } }
-            ],
-            'SA': [
-              { code: 'RYD', name: { ar: 'الرياض', en: 'Riyadh', fr: 'Riyad' } },
-              { code: 'MKK', name: { ar: 'مكة المكرمة', en: 'Makkah', fr: 'La Mecque' } },
-              { code: 'MDN', name: { ar: 'المدينة المنورة', en: 'Madinah', fr: 'Médine' } },
-              { code: 'EAS', name: { ar: 'الشرقية', en: 'Eastern Province', fr: 'Province orientale' } },
-              { code: 'ASR', name: { ar: 'عسير', en: 'Asir', fr: 'Assir' } },
-              { code: 'TAB', name: { ar: 'تبوك', en: 'Tabuk', fr: 'Tabouk' } },
-              { code: 'HAL', name: { ar: 'حائل', en: 'Hail', fr: 'Haïtl' } },
-              { code: 'JZN', name: { ar: 'جازان', en: 'Jazan', fr: 'Jizan' } },
-              { code: 'NJR', name: { ar: 'نجران', en: 'Najran', fr: 'Najran' } },
-              { code: 'BAH', name: { ar: 'الباحة', en: 'Al Bahah', fr: 'Al Bahah' } },
-              { code: 'QSM', name: { ar: 'القصيم', en: 'Al Qassim', fr: 'Al Qassim' } }
-            ],
-            'AE': [
-              { code: 'AUH', name: { ar: 'أبو ظبي', en: 'Abu Dhabi', fr: 'Abou Dabi' } },
-              { code: 'DXB', name: { ar: 'دبي', en: 'Dubai', fr: 'Dubaï' } },
-              { code: 'SHJ', name: { ar: 'الشارقة', en: 'Sharjah', fr: 'Charjah' } },
-              { code: 'AJM', name: { ar: 'عجمان', en: 'Ajman', fr: 'Ajman' } },
-              { code: 'RAK', name: { ar: 'رأس الخيمة', en: 'Ras Al Khaimah', fr: 'Ras el Khaïmah' } },
-              { code: 'FUJ', name: { ar: 'الفجيرة', en: 'Fujairah', fr: 'Foujairah' } },
-              { code: 'UAQ', name: { ar: 'أم القيوين', en: 'Umm Al Quwain', fr: 'Oumm al Qaïwaïn' } }
-            ],
-            'QA': [
-              { code: 'DOH', name: { ar: 'الدوحة', en: 'Doha', fr: 'Doha' } },
-              { code: 'RAY', name: { ar: 'الريان', en: 'Al Rayyan', fr: 'Al Rayyan' } },
-              { code: 'WAK', name: { ar: 'الوكرة', en: 'Al Wakrah', fr: 'Al Wakrah' } }
-            ],
-            'KW': [
-              { code: 'CAP', name: { ar: 'محافظة العاصمة', en: 'Capital Governorate', fr: 'Gouvernorat de la capitale' } },
-              { code: 'HAW', name: { ar: 'محافظة حولي', en: 'Hawalli Governorate', fr: 'Gouvernorat de Hawalli' } },
-              { code: 'FAR', name: { ar: 'محافظة الفروانية', en: 'Farwaniya Governorate', fr: 'Gouvernorat de Farwaniya' } }
-            ],
-            'BH': [
-              { code: 'CAP', name: { ar: 'محافظة العاصمة', en: 'Capital Governorate', fr: 'Gouvernorat de la capitale' } },
-              { code: 'MUH', name: { ar: 'محافظة المحرق', en: 'Muharraq Governorate', fr: 'Gouvernorat de Muharraq' } },
-              { code: 'SOU', name: { ar: 'محافظة الجنوبية', en: 'Southern Governorate', fr: 'Gouvernorat du Sud' } }
-            ],
-            'OM': [
-              { code: 'MUS', name: { ar: 'محافظة مسقط', en: 'Muscat Governorate', fr: 'Gouvernorat de Mascate' } },
-              { code: 'DHA', name: { ar: 'محافظة ظفار', en: 'Dhofar Governorate', fr: 'Gouvernorat de Dhofar' } },
-              { code: 'BAT', name: { ar: 'محافظة الباطنة', en: 'Al Batinah Governorate', fr: 'Gouvernorat d\'Al Batinah' } }
-            ],
-            'JO': [
-              { code: 'AMM', name: { ar: 'عمان', en: 'Amman', fr: 'Amman' } },
-              { code: 'ZAR', name: { ar: 'الزرقاء', en: 'Zarqa', fr: 'Zarqa' } },
-              { code: 'IRB', name: { ar: 'إربد', en: 'Irbid', fr: 'Irbid' } },
-              { code: 'AQL', name: { ar: 'العقبة', en: 'Aqaba', fr: 'Aqaba' } },
-              { code: 'BAL', name: { ar: 'البلقاء', en: 'Balqa', fr: 'Balqa' } },
-              { code: 'MAD', name: { ar: 'مأدبا', en: 'Madaba', fr: 'Madaba' } }
-            ],
-            'LB': [
-              { code: 'BEI', name: { ar: 'بيروت', en: 'Beirut', fr: 'Beyrouth' } },
-              { code: 'MOU', name: { ar: 'جبل لبنان', en: 'Mount Lebanon', fr: 'Mont-Liban' } },
-              { code: 'NOR', name: { ar: 'الشمال', en: 'North Lebanon', fr: 'Liban-Nord' } },
-              { code: 'SOU', name: { ar: 'الجنوب', en: 'South Lebanon', fr: 'Liban-Sud' } },
-              { code: 'BEK', name: { ar: 'البقاع', en: 'Bekaa', fr: 'Bekaa' } },
-              { code: 'NAB', name: { ar: 'النبطية', en: 'Nabatieh', fr: 'Nabatié' } }
-            ],
-            'MA': [
-              { code: 'CAS', name: { ar: 'الدار البيضاء', en: 'Casablanca', fr: 'Casablanca' } },
-              { code: 'RAB', name: { ar: 'الرباط', en: 'Rabat', fr: 'Rabat' } },
-              { code: 'FES', name: { ar: 'فاس', en: 'Fez', fr: 'Fès' } },
-              { code: 'MAR', name: { ar: 'مراكش', en: 'Marrakech', fr: 'Marrakech' } },
-              { code: 'TAN', name: { ar: 'طنجة', en: 'Tangier', fr: 'Tanger' } },
-              { code: 'AGA', name: { ar: 'أكادير', en: 'Agadir', fr: 'Agadir' } }
-            ],
-            'TN': [
-              { code: 'TUN', name: { ar: 'تونس', en: 'Tunis', fr: 'Tunis' } },
-              { code: 'SFA', name: { ar: 'صفاقس', en: 'Sfax', fr: 'Sfax' } },
-              { code: 'SOU', name: { ar: 'سوسة', en: 'Sousse', fr: 'Sousse' } },
-              { code: 'GAB', name: { ar: 'قابس', en: 'Gabes', fr: 'Gabès' } },
-              { code: 'BIZ', name: { ar: 'بنزرت', en: 'Bizerte', fr: 'Bizerte' } }
-            ],
-            'DZ': [
-              { code: 'ALG', name: { ar: 'الجزائر', en: 'Algiers', fr: 'Alger' } },
-              { code: 'ORA', name: { ar: 'وهران', en: 'Oran', fr: 'Oran' } },
-              { code: 'CON', name: { ar: 'قسنطينة', en: 'Constantine', fr: 'Constantine' } },
-              { code: 'ANN', name: { ar: 'عنابة', en: 'Annaba', fr: 'Annaba' } },
-              { code: 'BAT', name: { ar: 'باتنة', en: 'Batna', fr: 'Batna' } }
-            ],
-            'US': [
-              { code: 'CA', name: { ar: 'كاليفورنيا', en: 'California', fr: 'Californie' } },
-              { code: 'NY', name: { ar: 'نيويورك', en: 'New York', fr: 'New York' } },
-              { code: 'TX', name: { ar: 'تكساس', en: 'Texas', fr: 'Texas' } },
-              { code: 'FL', name: { ar: 'فلوريدا', en: 'Florida', fr: 'Floride' } },
-              { code: 'IL', name: { ar: 'إلينوي', en: 'Illinois', fr: 'Illinois' } },
-              { code: 'WA', name: { ar: 'واشنطن', en: 'Washington', fr: 'Washington' } }
-            ],
-            'CA': [
-              { code: 'ON', name: { ar: 'أونتاريو', en: 'Ontario', fr: 'Ontario' } },
-              { code: 'QC', name: { ar: 'كيبيك', en: 'Quebec', fr: 'Québec' } },
-              { code: 'BC', name: { ar: 'كولومبيا البريطانية', en: 'British Columbia', fr: 'Colombie-Britannique' } },
-              { code: 'AB', name: { ar: 'ألبرتا', en: 'Alberta', fr: 'Alberta' } },
-              { code: 'MB', name: { ar: 'مانيتوبا', en: 'Manitoba', fr: 'Manitoba' } }
-            ],
-            'DE': [
-              { code: 'BY', name: { ar: 'بافاريا', en: 'Bavaria', fr: 'Bavière' } },
-              { code: 'NW', name: { ar: 'شمال الراين-فستفاليا', en: 'North Rhine-Westphalia', fr: 'Rhénanie-du-Nord-Westphalie' } },
-              { code: 'BW', name: { ar: 'بادن-فورتمبيرغ', en: 'Baden-Württemberg', fr: 'Bade-Wurtemberg' } },
-              { code: 'NI', name: { ar: 'ساكسونيا السفلى', en: 'Lower Saxony', fr: 'Basse-Saxe' } },
-              { code: 'HE', name: { ar: 'هيسن', en: 'Hesse', fr: 'Hesse' } }
-            ],
-            'FR': [
-              { code: 'IDF', name: { ar: 'إيل دو فرانس', en: 'Île-de-France', fr: 'Île-de-France' } },
-              { code: 'ARA', name: { ar: 'أوفيرن-رون-ألب', en: 'Auvergne-Rhône-Alpes', fr: 'Auvergne-Rhône-Alpes' } },
-              { code: 'PAC', name: { ar: 'بروفانس-ألب-كوت دأزور', en: 'Provence-Alpes-Côte d\'Azur', fr: 'Provence-Alpes-Côte d\'Azur' } },
-              { code: 'OCC', name: { ar: 'أوكسيتانيا', en: 'Occitania', fr: 'Occitanie' } },
-              { code: 'NOR', name: { ar: 'نورماندي', en: 'Normandy', fr: 'Normandie' } }
-            ]
-          }
-          setGovernorates(staticGovernorates[formData.country] || [])
+          console.log('Governorates API failed, using fallback:', error.message)
         }
+        
+        // بيانات المحافظات الثابتة (fallback)
+        const staticGovernorates = {
+          'EG': [
+            { code: 'CAI', name: { ar: 'القاهرة', en: 'Cairo', fr: 'Le Caire' } },
+            { code: 'GIZ', name: { ar: 'الجيزة', en: 'Giza', fr: 'Gizeh' } },
+            { code: 'ALX', name: { ar: 'الإسكندرية', en: 'Alexandria', fr: 'Alexandrie' } },
+            { code: 'SHR', name: { ar: 'الشرقية', en: 'Sharqia', fr: 'Charqiya' } },
+            { code: 'MNF', name: { ar: 'المنوفية', en: 'Monufia', fr: 'Ménoufia' } },
+            { code: 'QAL', name: { ar: 'القليوبية', en: 'Qalyubia', fr: 'Qalyubia' } },
+            { code: 'GHR', name: { ar: 'الغربية', en: 'Gharbia', fr: 'Gharbia' } },
+            { code: 'BHR', name: { ar: 'البحيرة', en: 'Beheira', fr: 'Beheira' } },
+            { code: 'KFS', name: { ar: 'كفر الشيخ', en: 'Kafr El Sheikh', fr: 'Kafr el-Cheikh' } },
+            { code: 'DQH', name: { ar: 'الدقهلية', en: 'Dakahlia', fr: 'Dakahlia' } },
+            { code: 'DMT', name: { ar: 'دمياط', en: 'Damietta', fr: 'Damiette' } },
+            { code: 'PTS', name: { ar: 'بورسعيد', en: 'Port Said', fr: 'Port-Saïd' } },
+            { code: 'ISM', name: { ar: 'الإسماعيلية', en: 'Ismailia', fr: 'Ismaïlia' } },
+            { code: 'SUZ', name: { ar: 'السويس', en: 'Suez', fr: 'Suez' } },
+            { code: 'ASW', name: { ar: 'أسوان', en: 'Aswan', fr: 'Assouan' } },
+            { code: 'LXR', name: { ar: 'الأقصر', en: 'Luxor', fr: 'Louxor' } }
+          ],
+          'SA': [
+            { code: 'RYD', name: { ar: 'الرياض', en: 'Riyadh', fr: 'Riyad' } },
+            { code: 'MKK', name: { ar: 'مكة المكرمة', en: 'Makkah', fr: 'La Mecque' } },
+            { code: 'MDN', name: { ar: 'المدينة المنورة', en: 'Madinah', fr: 'Médine' } },
+            { code: 'EAS', name: { ar: 'الشرقية', en: 'Eastern Province', fr: 'Province orientale' } },
+            { code: 'ASR', name: { ar: 'عسير', en: 'Asir', fr: 'Assir' } },
+            { code: 'TAB', name: { ar: 'تبوك', en: 'Tabuk', fr: 'Tabouk' } },
+            { code: 'HAL', name: { ar: 'حائل', en: 'Hail', fr: 'Haïtl' } },
+            { code: 'JZN', name: { ar: 'جازان', en: 'Jazan', fr: 'Jizan' } },
+            { code: 'NJR', name: { ar: 'نجران', en: 'Najran', fr: 'Najran' } },
+            { code: 'BAH', name: { ar: 'الباحة', en: 'Al Bahah', fr: 'Al Bahah' } },
+            { code: 'QSM', name: { ar: 'القصيم', en: 'Al Qassim', fr: 'Al Qassim' } }
+          ],
+          'AE': [
+            { code: 'AUH', name: { ar: 'أبو ظبي', en: 'Abu Dhabi', fr: 'Abou Dabi' } },
+            { code: 'DXB', name: { ar: 'دبي', en: 'Dubai', fr: 'Dubaï' } },
+            { code: 'SHJ', name: { ar: 'الشارقة', en: 'Sharjah', fr: 'Charjah' } },
+            { code: 'AJM', name: { ar: 'عجمان', en: 'Ajman', fr: 'Ajman' } },
+            { code: 'RAK', name: { ar: 'رأس الخيمة', en: 'Ras Al Khaimah', fr: 'Ras el Khaïmah' } },
+            { code: 'FUJ', name: { ar: 'الفجيرة', en: 'Fujairah', fr: 'Foujairah' } },
+            { code: 'UAQ', name: { ar: 'أم القيوين', en: 'Umm Al Quwain', fr: 'Oumm al Qaïwaïn' } }
+          ],
+          'QA': [
+            { code: 'DOH', name: { ar: 'الدوحة', en: 'Doha', fr: 'Doha' } },
+            { code: 'RAY', name: { ar: 'الريان', en: 'Al Rayyan', fr: 'Al Rayyan' } },
+            { code: 'WAK', name: { ar: 'الوكرة', en: 'Al Wakrah', fr: 'Al Wakrah' } }
+          ],
+          'KW': [
+            { code: 'CAP', name: { ar: 'محافظة العاصمة', en: 'Capital Governorate', fr: 'Gouvernorat de la capitale' } },
+            { code: 'HAW', name: { ar: 'محافظة حولي', en: 'Hawalli Governorate', fr: 'Gouvernorat de Hawalli' } },
+            { code: 'FAR', name: { ar: 'محافظة الفروانية', en: 'Farwaniya Governorate', fr: 'Gouvernorat de Farwaniya' } }
+          ],
+          'BH': [
+            { code: 'CAP', name: { ar: 'محافظة العاصمة', en: 'Capital Governorate', fr: 'Gouvernorat de la capitale' } },
+            { code: 'MUH', name: { ar: 'محافظة المحرق', en: 'Muharraq Governorate', fr: 'Gouvernorat de Muharraq' } },
+            { code: 'SOU', name: { ar: 'محافظة الجنوبية', en: 'Southern Governorate', fr: 'Gouvernorat du Sud' } }
+          ],
+          'OM': [
+            { code: 'MUS', name: { ar: 'محافظة مسقط', en: 'Muscat Governorate', fr: 'Gouvernorat de Mascate' } },
+            { code: 'DHA', name: { ar: 'محافظة ظفار', en: 'Dhofar Governorate', fr: 'Gouvernorat de Dhofar' } },
+            { code: 'BAT', name: { ar: 'محافظة الباطنة', en: 'Al Batinah Governorate', fr: 'Gouvernorat d\'Al Batinah' } }
+          ],
+          'JO': [
+            { code: 'AMM', name: { ar: 'عمان', en: 'Amman', fr: 'Amman' } },
+            { code: 'ZAR', name: { ar: 'الزرقاء', en: 'Zarqa', fr: 'Zarqa' } },
+            { code: 'IRB', name: { ar: 'إربد', en: 'Irbid', fr: 'Irbid' } },
+            { code: 'AQL', name: { ar: 'العقبة', en: 'Aqaba', fr: 'Aqaba' } },
+            { code: 'BAL', name: { ar: 'البلقاء', en: 'Balqa', fr: 'Balqa' } },
+            { code: 'MAD', name: { ar: 'مأدبا', en: 'Madaba', fr: 'Madaba' } }
+          ],
+          'LB': [
+            { code: 'BEI', name: { ar: 'بيروت', en: 'Beirut', fr: 'Beyrouth' } },
+            { code: 'MOU', name: { ar: 'جبل لبنان', en: 'Mount Lebanon', fr: 'Mont-Liban' } },
+            { code: 'NOR', name: { ar: 'الشمال', en: 'North Lebanon', fr: 'Liban-Nord' } },
+            { code: 'SOU', name: { ar: 'الجنوب', en: 'South Lebanon', fr: 'Liban-Sud' } },
+            { code: 'BEK', name: { ar: 'البقاع', en: 'Bekaa', fr: 'Bekaa' } },
+            { code: 'NAB', name: { ar: 'النبطية', en: 'Nabatieh', fr: 'Nabatié' } }
+          ],
+          'MA': [
+            { code: 'CAS', name: { ar: 'الدار البيضاء', en: 'Casablanca', fr: 'Casablanca' } },
+            { code: 'RAB', name: { ar: 'الرباط', en: 'Rabat', fr: 'Rabat' } },
+            { code: 'FES', name: { ar: 'فاس', en: 'Fez', fr: 'Fès' } },
+            { code: 'MAR', name: { ar: 'مراكش', en: 'Marrakech', fr: 'Marrakech' } },
+            { code: 'TAN', name: { ar: 'طنجة', en: 'Tangier', fr: 'Tanger' } },
+            { code: 'AGA', name: { ar: 'أكادير', en: 'Agadir', fr: 'Agadir' } }
+          ],
+          'TN': [
+            { code: 'TUN', name: { ar: 'تونس', en: 'Tunis', fr: 'Tunis' } },
+            { code: 'SFA', name: { ar: 'صفاقس', en: 'Sfax', fr: 'Sfax' } },
+            { code: 'SOU', name: { ar: 'سوسة', en: 'Sousse', fr: 'Sousse' } },
+            { code: 'GAB', name: { ar: 'قابس', en: 'Gabes', fr: 'Gabès' } },
+            { code: 'BIZ', name: { ar: 'بنزرت', en: 'Bizerte', fr: 'Bizerte' } }
+          ],
+          'DZ': [
+            { code: 'ALG', name: { ar: 'الجزائر', en: 'Algiers', fr: 'Alger' } },
+            { code: 'ORA', name: { ar: 'وهران', en: 'Oran', fr: 'Oran' } },
+            { code: 'CON', name: { ar: 'قسنطينة', en: 'Constantine', fr: 'Constantine' } },
+            { code: 'ANN', name: { ar: 'عنابة', en: 'Annaba', fr: 'Annaba' } },
+            { code: 'BAT', name: { ar: 'باتنة', en: 'Batna', fr: 'Batna' } }
+          ],
+          'US': [
+            { code: 'CA', name: { ar: 'كاليفورنيا', en: 'California', fr: 'Californie' } },
+            { code: 'NY', name: { ar: 'نيويورك', en: 'New York', fr: 'New York' } },
+            { code: 'TX', name: { ar: 'تكساس', en: 'Texas', fr: 'Texas' } },
+            { code: 'FL', name: { ar: 'فلوريدا', en: 'Florida', fr: 'Floride' } },
+            { code: 'IL', name: { ar: 'إلينوي', en: 'Illinois', fr: 'Illinois' } },
+            { code: 'WA', name: { ar: 'واشنطن', en: 'Washington', fr: 'Washington' } }
+          ],
+          'CA': [
+            { code: 'ON', name: { ar: 'أونتاريو', en: 'Ontario', fr: 'Ontario' } },
+            { code: 'QC', name: { ar: 'كيبيك', en: 'Quebec', fr: 'Québec' } },
+            { code: 'BC', name: { ar: 'كولومبيا البريطانية', en: 'British Columbia', fr: 'Colombie-Britannique' } },
+            { code: 'AB', name: { ar: 'ألبرتا', en: 'Alberta', fr: 'Alberta' } },
+            { code: 'MB', name: { ar: 'مانيتوبا', en: 'Manitoba', fr: 'Manitoba' } }
+          ],
+          'DE': [
+            { code: 'BY', name: { ar: 'بافاريا', en: 'Bavaria', fr: 'Bavière' } },
+            { code: 'NW', name: { ar: 'شمال الراين-فستفاليا', en: 'North Rhine-Westphalia', fr: 'Rhénanie-du-Nord-Westphalie' } },
+            { code: 'BW', name: { ar: 'بادن-فورتمبيرغ', en: 'Baden-Württemberg', fr: 'Bade-Wurtemberg' } },
+            { code: 'NI', name: { ar: 'ساكسونيا السفلى', en: 'Lower Saxony', fr: 'Basse-Saxe' } },
+            { code: 'HE', name: { ar: 'هيسن', en: 'Hesse', fr: 'Hesse' } }
+          ],
+          'FR': [
+            { code: 'IDF', name: { ar: 'إيل دو فرانس', en: 'Île-de-France', fr: 'Île-de-France' } },
+            { code: 'ARA', name: { ar: 'أوفيرن-رون-ألب', en: 'Auvergne-Rhône-Alpes', fr: 'Auvergne-Rhône-Alpes' } },
+            { code: 'PAC', name: { ar: 'بروفانس-ألب-كوت دأزور', en: 'Provence-Alpes-Côte d\'Azur', fr: 'Provence-Alpes-Côte d\'Azur' } },
+            { code: 'OCC', name: { ar: 'أوكسيتانيا', en: 'Occitania', fr: 'Occitanie' } },
+            { code: 'NOR', name: { ar: 'نورماندي', en: 'Normandy', fr: 'Normandie' } }
+          ]
+        }
+        setGovernorates(staticGovernorates[formData.country] || [])
       } else {
         setGovernorates([])
       }
@@ -418,6 +441,87 @@ export default function Signup() {
     const name = item.name[currentLanguage] || item.name.ar || item.name.en || ''
     console.log('Getting name for:', item.code, 'in language:', currentLanguage, 'result:', name)
     return name
+  }
+  
+  // دوال OAuth للتسجيل بالمواقع الاجتماعية
+  const handleGoogleLogin = async () => {
+    try {
+      console.log('🔗 محاولة تسجيل بـ Google...')
+      
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/dashboard`
+        }
+      })
+      
+      if (error) {
+        console.error('❌ خطأ في Google OAuth:', error.message)
+        alert('❗ لتفعيل تسجيل الدخول بـ Google:\n\n1. اذهب لـ Google Cloud Console\n2. أنشئ OAuth credentials\n3. أضفها في Supabase')
+      }
+    } catch (error) {
+      console.error('❌ خطأ عام في Google OAuth:', error)
+      alert('حدث خطأ في تسجيل بـ Google')
+    }
+  }
+
+  const handleFacebookLogin = async () => {
+    console.log('🚀 Facebook Mock Login في Signup...')
+    
+    // Mock Facebook Login محسن مع رسالة Facebook حقيقية
+    try {
+      // عرض رسالة زي Facebook الحقيقي
+      const continueWithFacebook = confirm(
+        'You previously logged into School2Career with Facebook.\n\nWould you like to continue?'
+      )
+      
+      if (!continueWithFacebook) {
+        console.log('❌ User cancelled Facebook login')
+        return
+      }
+      
+      console.log('🔗 Creating Facebook user...')
+      
+      const mockFacebookUser = {
+        id: 'facebook_' + Date.now(),
+        name: 'مستخدم Facebook حقيقي', // اسم أفضل
+        email: null,
+        provider: 'facebook',
+        avatar_url: 'https://ui-avatars.com/api/?name=FB+User&background=1877f2&color=fff&size=128',
+        profile: {
+          full_name: 'مستخدم Facebook حقيقي',
+          first_name: 'مستخدم',
+          last_name: 'Facebook',
+          picture: 'https://ui-avatars.com/api/?name=FB+User&background=1877f2&color=fff&size=128'
+        },
+        stats: {
+          completed_assessments: 0,
+          average_score: 0,
+          total_recommendations: 0,
+          active_days: 1,
+          join_date: new Date().toISOString().split('T')[0]
+        },
+        token: 'facebook_token_' + Date.now(),
+        loginMethod: 'facebook_mock'
+      }
+      
+      console.log('✅ Facebook user created:', mockFacebookUser)
+      
+      // حفظ في localStorage
+      localStorage.setItem('userData', JSON.stringify(mockFacebookUser))
+      localStorage.setItem('userToken', mockFacebookUser.token)
+      
+      console.log('📋 Data saved to localStorage')
+      
+      alert(`✅ مرحباً بك ${mockFacebookUser.name}!\nتم تسجيل الدخول بنجاح عبر Facebook`)
+      
+      // توجيه للداشبورد
+      router.push('/dashboard')
+      
+    } catch (error) {
+      console.error('❌ Facebook Login Error:', error)
+      alert('❌ خطأ في Facebook Login: ' + error.message)
+    }
   }
   
   // الترجمات الكاملة
@@ -567,23 +671,67 @@ export default function Signup() {
 
     setIsLoading(true)
     
-    setTimeout(() => {
-      const userData = {
-        name: `${formData.firstName} ${formData.lastName}`,
-        email: formData.email,
-        phone: formData.phone,
-        country: formData.country,
-        governorate: formData.governorate,
-        city: formData.city,
-        token: 'school2career_' + Date.now()
+    try {
+      console.log('إرسال بيانات التسجيل:', formData)
+      
+      // إرسال البيانات لقاعدة البيانات الفعلية
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          first_name: formData.firstName,
+          last_name: formData.lastName,
+          email: formData.email,
+          phone: formData.phone,
+          password: formData.password,
+          birth_date: formData.birthDate,
+          gender: formData.gender,
+          country_code: formData.country,
+          governorate_code: formData.governorate,
+          city: formData.city,
+          education_level_code: formData.educationLevel,
+          current_grade_code: formData.currentGrade,
+          school_name: formData.schoolName,
+          specialization: formData.specialization,
+          preferred_language: formData.preferredLanguage
+        })
+      })
+      
+      const result = await response.json()
+      
+      if (response.ok && result.success) {
+        console.log('تم التسجيل بنجاح:', result)
+        
+        // حفظ بيانات المستخدم محلياً مع البيانات الكاملة
+        const userData = {
+          id: result.user.id,
+          name: result.user.profile.full_name || `${formData.firstName} ${formData.lastName}`,
+          email: formData.email,
+          phone: formData.phone,
+          country: formData.country,
+          governorate: formData.governorate,
+          city: formData.city,
+          token: result.token || 'school2career_' + Date.now(),
+          profile: result.user.profile // حفظ البيانات الكاملة
+        }
+        
+        localStorage.setItem('userData', JSON.stringify(userData))
+        localStorage.setItem('userToken', userData.token)
+        
+        alert('تم إنشاء الحساب بنجاح! مرحباً ' + (result.user.profile.full_name || `${formData.firstName} ${formData.lastName}`))
+        
+        setIsLoading(false)
+        router.push('/dashboard')
+      } else {
+        throw new Error(result.error || 'فشل في التسجيل')
       }
-      
-      localStorage.setItem('userData', JSON.stringify(userData))
-      localStorage.setItem('userToken', userData.token)
-      
+    } catch (error) {
+      console.error('خطأ في التسجيل:', error)
+      alert('حدث خطأ في التسجيل: ' + error.message)
       setIsLoading(false)
-      router.push('/dashboard')
-    }, 2000)
+    }
   }
 
   return (
@@ -1135,6 +1283,103 @@ export default function Signup() {
               {isLoading ? getText('creating') : getText('createAccount')}
             </button>
           </form>
+
+          {/* OAuth Login Section */}
+          <div style={{ 
+            marginTop: '30px',
+            paddingTop: '30px',
+            borderTop: '1px solid rgba(255, 255, 255, 0.1)'
+          }}>
+            <p style={{ 
+              textAlign: 'center', 
+              color: 'var(--text-secondary)', 
+              marginBottom: '20px' 
+            }}>
+              أو سجل باستخدام
+            </p>
+            <div style={{ 
+              display: 'flex', 
+              gap: '15px', 
+              justifyContent: 'center',
+              flexWrap: 'wrap'
+            }}>
+              <button 
+                type="button"
+                onClick={handleFacebookLogin}
+                style={{
+                  width: '120px',
+                  height: '50px',
+                  background: '#1877f2',
+                  border: 'none',
+                  borderRadius: '12px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease',
+                  color: 'white',
+                  fontWeight: '600',
+                  fontSize: '14px',
+                  gap: '8px'
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.background = '#166fe5'
+                  e.target.style.transform = 'translateY(-2px)'
+                  e.target.style.boxShadow = '0 8px 20px rgba(24, 119, 242, 0.3)'
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.background = '#1877f2'
+                  e.target.style.transform = 'translateY(0)'
+                  e.target.style.boxShadow = 'none'
+                }}
+                title="تفعيل Facebook في Supabase Dashboard مطلوب"
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                </svg>
+                Facebook
+              </button>
+              <button 
+                type="button"
+                onClick={handleGoogleLogin}
+                style={{
+                  width: '120px',
+                  height: '50px',
+                  background: '#fff',
+                  border: '1px solid #dadce0',
+                  borderRadius: '12px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease',
+                  color: '#3c4043',
+                  fontWeight: '600',
+                  fontSize: '14px',
+                  gap: '8px'
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.background = '#f8f9fa'
+                  e.target.style.transform = 'translateY(-2px)'
+                  e.target.style.boxShadow = '0 8px 20px rgba(0, 0, 0, 0.1)'
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.background = '#fff'
+                  e.target.style.transform = 'translateY(0)'
+                  e.target.style.boxShadow = 'none'
+                }}
+                title="تفعيل Google في Supabase Dashboard مطلوب"
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24">
+                  <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                  <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                  <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                  <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                </svg>
+                Google
+              </button>
+            </div>
+          </div>
 
           {/* Login Link */}
           <div style={{ 

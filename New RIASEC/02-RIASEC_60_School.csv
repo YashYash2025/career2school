@@ -1,0 +1,61 @@
+﻿ID,Type,English_Text,Arabic_Text,French_Text
+R01,R,I like fixing or assembling gadgets.,أحب إصلاح أو تجميع الأجهزة.,J'aime réparer ou assembler des appareils.
+R02,R,I enjoy building things with tools or kits.,أستمتع ببناء الأشياء باستخدام الأدوات أو الأطقم.,J'aime construire des choses avec des outils ou des kits.
+R03,R,I like setting up gaming or VR equipment.,أحب إعداد معدات الألعاب أو الواقع الافتراضي.,J'aime installer des équipements de jeux ou de réalité virtuelle.
+R04,R,I enjoy doing sports or physical training.,أستمتع بممارسة الرياضة أو التمرين البدني.,J'aime faire du sport ou de l'entraînement physique.
+R05,R,I like cooking or baking new recipes.,أحب الطبخ أو خبز وصفات جديدة.,J'aime cuisiner ou faire de la pâtisserie avec de nouvelles recettes.
+R06,R,"I enjoy planting, gardening, or caring for pets.",أستمتع بالزراعة أو البستنة أو رعاية الحيوانات الأليفة.,J'aime planter, jardiner ou m'occuper d'animaux de compagnie.
+R07,R,I like using robotics or electronics kits.,أحب استخدام أطقم الروبوتات أو الإلكترونيات.,J'aime utiliser des kits de robotique ou d'électronique.
+R08,R,I enjoy helping with school stage/maintenance setups.,أستمتع بالمساعدة في تجهيز المسرح أو صيانة المدرسة.,J'aime aider à installer la scène ou à l'entretien de l'école.
+R09,R,"I like outdoor activities (hiking, biking, camping).","أحب الأنشطة الخارجية (المشي الجبلي، ركوب الدراجات، التخييم).",J'aime les activités de plein air (randonnée, vélo, camping).
+R10,R,I enjoy learning to use power tools safely.,أستمتع بتعلم استخدام الأدوات الكهربائية بأمان.,J'aime apprendre à utiliser des outils électriques en toute sécurité.
+I01,I,I like solving science or math problems.,أحب حل مسائل العلوم أو الرياضيات.,J'aime résoudre des problèmes de sciences ou de mathématiques.
+I02,I,I enjoy coding small apps or games.,أستمتع ببرمجة تطبيقات أو ألعاب صغيرة.,J'aime programmer de petites applications ou des jeux.
+I03,I,I like running experiments to test ideas.,أحب إجراء تجارب لاختبار الأفكار.,J'aime faire des expériences pour tester des idées.
+I04,I,I enjoy figuring out how things work.,أستمتع باكتشاف كيف تعمل الأشياء.,J'aime découvrir comment les choses fonctionnent.
+I05,I,I like analyzing data in spreadsheets.,أحب تحليل البيانات في جداول البيانات.,J'aime analyser des données dans des feuilles de calcul.
+I06,I,"I enjoy reading about AI, space, or medicine.",أستمتع بقراءة موضوعات عن الذكاء الاصطناعي أو الفضاء أو الطب.,J'aime lire sur l'IA, l'espace ou la médecine.
+I07,I,I like logic puzzles and brain teasers.,أحب الألغاز المنطقية وأسئلة الذكاء.,J'aime les énigmes logiques et les casse-têtes.
+I08,I,I enjoy using simulations or lab tools.,أستمتع باستخدام المحاكاة أو أدوات المختبر.,J'aime utiliser des simulations ou des outils de laboratoire.
+I09,I,I like asking deep questions and researching answers.,أحب طرح أسئلة عميقة والبحث عن إجاباتها.,J'aime poser des questions profondes et rechercher des réponses.
+I10,I,I enjoy science fairs or STEM clubs.,أستمتع بالمعارض العلمية أو أندية العلوم والتقنية.,J'aime les foires scientifiques ou les clubs STEM.
+A01,A,I like drawing or creating digital art.,أحب الرسم أو إنشاء فنون رقمية.,J'aime dessiner ou créer de l'art numérique.
+A02,A,I enjoy making and editing videos.,أستمتع بصناعة وتحرير الفيديوهات.,J'aime créer et monter des vidéos.
+A03,A,"I like writing stories, poems, or blogs.",أحب كتابة القصص أو القصائد أو المدوّنات.,J'aime écrire des histoires, des poèmes ou des blogs.
+A04,A,I enjoy composing music or beats.,أستمتع بتأليف الموسيقى أو الإيقاعات.,J'aime composer de la musique ou des rythmes.
+A05,A,"I like designing posters, logos, or websites.",أحب تصميم الملصقات أو الشعارات أو المواقع.,J'aime concevoir des affiches, des logos ou des sites web.
+A06,A,"I enjoy acting, improv, or performing.",أستمتع بالتمثيل أو الارتجال أو الأداء.,J'aime jouer, improviser ou me produire sur scène.
+A07,A,I like decorating spaces with good aesthetics.,أحب تزيين الأماكن بذوق جميل.,J'aime décorer des espaces avec une belle esthétique.
+A08,A,I enjoy photography or photo editing.,أستمتع بالتصوير الفوتوغرافي أو تعديل الصور.,J'aime la photographie ou la retouche photo.
+A09,A,I like fashion design or styling outfits.,أحب تصميم الأزياء أو تنسيق الملابس.,J'aime le design de mode ou la création de tenues.
+A10,A,I enjoy creative projects for social media.,أستمتع بالمشاريع الإبداعية لوسائل التواصل الاجتماعي.,J'aime les projets créatifs pour les réseaux sociaux.
+S01,S,I like helping classmates understand work.,أحب مساعدة زملائي على فهم الدروس.,J'aime aider mes camarades à comprendre les leçons.
+S02,S,I enjoy tutoring or mentoring younger students.,أستمتع بالتدريس أو إرشاد الطلاب الأصغر سناً.,J'aime donner des cours ou encadrer les élèves plus jeunes.
+S03,S,I like volunteering in community activities.,أحب التطوع في أنشطة المجتمع.,J'aime faire du bénévolat dans des activités communautaires.
+S04,S,I enjoy listening and supporting friends’ feelings.,أستمتع بالاستماع ودعم مشاعر الأصدقاء.,J'aime écouter et soutenir les sentiments de mes amis.
+S05,S,I like organizing study groups.,أحب تنظيم مجموعات دراسية.,J'aime organiser des groupes d'étude.
+S06,S,I enjoy planning charity or school events.,أستمتع بالتخطيط لفعاليات خيرية أو مدرسية.,J'aime planifier des événements caritatifs ou scolaires.
+S07,S,I like explaining ideas in a simple way.,أحب شرح الأفكار بطريقة بسيطة.,J'aime expliquer des idées de manière simple.
+S08,S,I enjoy healthcare or first-aid topics.,أستمتع بموضوعات الرعاية الصحية أو الإسعافات الأولية.,J'aime les sujets de santé ou de premiers secours.
+S09,S,I like collaborating to solve problems as a team.,أحب التعاون لحل المشكلات كفريق.,J'aime collaborer pour résoudre des problèmes en équipe.
+S10,S,I enjoy welcoming new students and helping them adapt.,أستمتع بالترحيب بالطلاب الجدد ومساعدتهم على التأقلم.,J'aime accueillir les nouveaux élèves et les aider à s'adapter.
+E01,E,I like leading group projects.,أحب قيادة المشاريع الجماعية.,J'aime diriger des projets de groupe.
+E02,E,I enjoy pitching ideas to others.,أستمتع بعرض الأفكار على الآخرين.,J'aime présenter des idées aux autres.
+E03,E,I like planning events or fundraisers.,أحب التخطيط للفعاليات أو جمع التبرعات.,J'aime planifier des événements ou des collectes de fonds.
+E04,E,I enjoy persuading people to support a cause.,أستمتع بإقناع الناس بدعم قضية معينة.,J'aime convaincre les gens de soutenir une cause.
+E05,E,I like starting small business ideas online.,أحب بدء أفكار لمشاريع صغيرة عبر الإنترنت.,J'aime lancer de petites idées d'entreprise en ligne.
+E06,E,I enjoy debating and public speaking.,أستمتع بالمناظرة والتحدث أمام الجمهور.,J'aime débattre et parler en public.
+E07,E,I like promoting content on social media.,أحب الترويج للمحتوى على وسائل التواصل الاجتماعي.,J'aime promouvoir du contenu sur les réseaux sociaux.
+E08,E,I enjoy being the captain or coordinator of a team.,أستمتع بأن أكون قائدًا أو منسقًا لفريق.,J'aime être le capitaine ou le coordinateur d'une équipe.
+E09,E,I like negotiating and making deals.,أحب التفاوض وإبرام الصفقات.,J'aime négocier et conclure des accords.
+E10,E,I enjoy setting goals and motivating others.,أستمتع بوضع الأهداف وتحفيز الآخرين.,J'aime fixer des objectifs et motiver les autres.
+C01,C,"I like organizing files, notes, or apps.",أحب تنظيم الملفات أو الملاحظات أو التطبيقات.,J'aime organiser des fichiers, des notes ou des applications.
+C02,C,I enjoy keeping track of tasks and deadlines.,أستمتع بمتابعة المهام والمواعيد النهائية.,J'aime suivre les tâches et les échéances.
+C03,C,I like working with spreadsheets or forms.,أحب العمل بالجداول أو النماذج.,J'aime travailler avec des feuilles de calcul ou des formulaires.
+C04,C,I enjoy following clear rules and instructions.,أستمتع باتباع القواعد والتعليمات الواضحة.,J'aime suivre des règles et des instructions claires.
+C05,C,I like checking details to avoid mistakes.,أحب التدقيق في التفاصيل لتجنب الأخطاء.,J'aime vérifier les détails pour éviter les erreurs.
+C06,C,I enjoy entering data accurately.,أستمتع بإدخال البيانات بدقة.,J'aime saisir des données avec précision.
+C07,C,I like labeling and categorizing things.,أحب وضع التسميات وتصنيف الأشياء.,J'aime étiqueter et catégoriser les choses.
+C08,C,I enjoy managing budgets or points/scores.,أستمتع بإدارة الميزانيات أو النقاط/الدرجات.,J'aime gérer des budgets ou des points/scores.
+C09,C,I like using planners and to-do lists.,أحب استخدام المخططات وقوائم المهام.,J'aime utiliser des planificateurs et des listes de tâches.
+C10,C,I enjoy keeping places tidy and orderly.,أستمتع بالحفاظ على الأماكن مرتبة ومنظمة.,J'aime garder les endroits propres et ordonnés.

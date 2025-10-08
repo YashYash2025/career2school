@@ -142,24 +142,39 @@ async function generateCareerRecommendations(result) {
     const hollandCode = result.calculated_scores?.holland_code;
     if (!hollandCode) return [];
 
-    // Basic career mapping based on Holland Code
-    const careerMap = {
-      'R': ['مهندس ميكانيكي', 'فني صيانة', 'مزارع', 'عامل بناء'],
-      'I': ['عالم', 'باحث', 'محلل بيانات', 'طبيب'],
-      'A': ['فنان', 'مصمم', 'كاتب', 'موسيقي'],
-      'S': ['معلم', 'طبيب نفسي', 'أخصائي اجتماعي', 'ممرض'],
-      'E': ['مدير أعمال', 'مندوب مبيعات', 'سياسي', 'رجل أعمال'],
-      'C': ['محاسب', 'مساعد إداري', 'محلل مالي', 'مدقق']
-    };
+    // جلب التوصيات من جدول riasec_recommendations الجديد
+    const { createClient } = require('@supabase/supabase-js');
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY
+    );
 
-    const recommendations = [];
-    for (const type of hollandCode.split('')) {
-      if (careerMap[type]) {
-        recommendations.push(...careerMap[type].slice(0, 2));
-      }
+    // تحديد المنطقة والمرحلة (يمكن تخصيصها لاحقاً)
+    const region = 'Egypt'; // يمكن أخذها من user profile
+    const educationLevel = 'Work'; // يمكن أخذها من user profile أو result metadata
+
+    const { data, error } = await supabase
+      .from('riasec_recommendations')
+      .select('recommendations_ar')
+      .eq('holland_code', hollandCode)
+      .eq('region', region)
+      .eq('education_level', educationLevel)
+      .single();
+
+    if (error || !data) {
+      console.error('Error fetching recommendations:', error);
+      // Fallback to basic recommendations if database fetch fails
+      return [];
     }
 
-    return recommendations.slice(0, 6); // Top 6 recommendations
+    // استخراج الوظائف من النص (مفصولة بـ ؛ أو ;)
+    const careers = data.recommendations_ar
+      .split(/[؛;]/) // فصل بـ ؛ العربية أو ; الإنجليزية
+      .map(career => career.trim())
+      .filter(career => career.length > 0)
+      .slice(0, 6); // أول 6 وظائف
+
+    return careers;
   } catch (error) {
     console.error('Career recommendation generation error:', error);
     return [];

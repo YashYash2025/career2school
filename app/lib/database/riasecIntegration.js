@@ -41,6 +41,53 @@ class RIASECDatabaseIntegration {
       
       console.log(`🎯 Target question count: ${targetCount}`);
       
+      // Handle new school/college versions (60 questions each)
+      if (version === 'school' || version === 'college') {
+        const toolCode = version === 'school' ? 'RIASEC_60_SCHOOL' : 'RIASEC_60_COLLEGE';
+        console.log(`🎓 Fetching ${version} questions - Tool: ${toolCode}`);
+        
+        // Get tool from database
+        const { data: tool, error: toolError } = await supabase
+          .from('assessment_tools')
+          .select('id, code')
+          .eq('code', toolCode)
+          .single();
+
+        if (toolError) {
+          throw new Error(`${toolCode} tool not found in database: ${toolError.message}`);
+        }
+
+        console.log(`✅ Found tool: ${tool.code} (ID: ${tool.id})`);
+
+        // Fetch all questions for this tool
+        const { data: allQuestions, error: questionsError } = await supabase
+          .from('assessment_questions')
+          .select('*')
+          .eq('tool_id', tool.id)
+          .order('order_index');
+
+        if (questionsError) {
+          throw new Error(`Failed to fetch questions: ${questionsError.message}`);
+        }
+
+        if (!allQuestions || allQuestions.length === 0) {
+          throw new Error(`No questions found for ${toolCode}`);
+        }
+
+        console.log(`📋 Found ${allQuestions.length} questions for ${version}`);
+
+        // Format questions for the frontend
+        return allQuestions.map((q, index) => ({
+          id: q.id,
+          order: q.order_index || index + 1,
+          text: q[`question_${language}`] || q.question_ar,
+          originalText: q[`question_${language}`] || q.question_ar,
+          type: q.dimension,
+          weight: q.weight || 1.0,
+          isReverse: q.is_reverse_scored || false
+        }));
+      }
+      
       // Handle School2Career versions - Use stratified sampling for the enhanced versions
       if (version === 'school2career' || version.startsWith('school2career-')) {
         let targetQuestions = 120; // Default School2Career

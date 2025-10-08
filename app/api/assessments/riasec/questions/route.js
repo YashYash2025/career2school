@@ -11,7 +11,7 @@ export async function GET(request) {
     const useStratifiedSampling = searchParams.get('stratified') !== 'false'; // Default to true
 
     // Validate version
-    const validVersions = ['30', '60', '180', 'school2career', 'school2career-30', 'school2career-60', 'school2career-120'];
+    const validVersions = ['30', '60', '180', 'school', 'college', 'school2career', 'school2career-30', 'school2career-60', 'school2career-120'];
     if (!validVersions.includes(version)) {
       return NextResponse.json(
         { error: `Invalid version. Must be one of: ${validVersions.join(', ')}`, code: 'INVALID_VERSION' },

@@ -74,6 +74,8 @@ const RIASECInternationalResults = ({
   const [showNotifications, setShowNotifications] = useState(false);
   const [confidenceScore, setConfidenceScore] = useState(0);
   const [linkedinJobs, setLinkedinJobs] = useState([]);
+  const [recommendations, setRecommendations] = useState(null);
+  const [loadingRecommendations, setLoadingRecommendations] = useState(false);
   const resultsRef = useRef(null);
   
   // استخراج البيانات الرئيسية في بداية component
@@ -507,6 +509,34 @@ const RIASECInternationalResults = ({
       setConfidenceScore(newResult.confidence);
     }
   }, [algorithmResults]);
+
+  // Fetch recommendations
+  useEffect(() => {
+    const fetchRecommendations = async () => {
+      if (!holland_code) return;
+      
+      setLoadingRecommendations(true);
+      try {
+        const response = await fetch(
+          `/api/assessments/riasec/recommendations?code=${holland_code}&region=Egypt&level=High`
+        );
+        
+        if (response.ok) {
+          const data = await response.json();
+          setRecommendations(data.recommendations);
+          console.log('✅ تم جلب التوصيات:', data.recommendations);
+        } else {
+          console.error('❌ فشل جلب التوصيات');
+        }
+      } catch (error) {
+        console.error('❌ خطأ في جلب التوصيات:', error);
+      } finally {
+        setLoadingRecommendations(false);
+      }
+    };
+    
+    fetchRecommendations();
+  }, [holland_code]);
 
   // Chart data preparation
   const prepareChartData = (scores) => {
@@ -3240,6 +3270,150 @@ const RIASECInternationalResults = ({
     </div>
   );
 
+  // Recommendations Tab Component
+  const RecommendationsTab = () => {
+    if (loadingRecommendations) {
+      return (
+        <div style={{ textAlign: 'center', padding: '60px', color: '#a8a8b8' }}>
+          <div style={{ fontSize: '48px', marginBottom: '20px' }}>⏳</div>
+          <div style={{ fontSize: '18px' }}>جاري تحميل التوصيات...</div>
+        </div>
+      );
+    }
+
+    if (!recommendations) {
+      return (
+        <div style={{ textAlign: 'center', padding: '60px', color: '#a8a8b8' }}>
+          <div style={{ fontSize: '48px', marginBottom: '20px' }}>❌</div>
+          <div style={{ fontSize: '18px' }}>لم يتم العثور على توصيات لهذا الكود</div>
+        </div>
+      );
+    }
+
+    return (
+      <div style={{ direction: 'rtl' }}>
+        {/* Header */}
+        <div style={{
+          background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(139, 92, 246, 0.15))',
+          borderRadius: '20px',
+          padding: '30px',
+          marginBottom: '30px',
+          border: '1px solid rgba(59, 130, 246, 0.3)',
+          textAlign: 'center'
+        }}>
+          <h2 style={{
+            fontSize: '32px',
+            fontWeight: 'bold',
+            color: '#ffffff',
+            marginBottom: '15px',
+            fontFamily: 'Cairo, Arial, sans-serif'
+          }}>
+            🎯 التوصيات المهنية المخصصة
+          </h2>
+          <div style={{
+            display: 'flex',
+            justifyContent: 'center',
+            gap: '20px',
+            flexWrap: 'wrap',
+            marginTop: '20px'
+          }}>
+            <div style={{
+              background: 'rgba(59, 130, 246, 0.2)',
+              padding: '10px 20px',
+              borderRadius: '12px',
+              color: '#93c5fd',
+              fontWeight: 'bold'
+            }}>
+              كود هولاند: {recommendations.holland_code}
+            </div>
+            <div style={{
+              background: 'rgba(139, 92, 246, 0.2)',
+              padding: '10px 20px',
+              borderRadius: '12px',
+              color: '#c4b5fd',
+              fontWeight: 'bold'
+            }}>
+              المنطقة: {recommendations.region}
+            </div>
+            <div style={{
+              background: 'rgba(16, 185, 129, 0.2)',
+              padding: '10px 20px',
+              borderRadius: '12px',
+              color: '#6ee7b7',
+              fontWeight: 'bold'
+            }}>
+              المرحلة: {recommendations.education_level}
+            </div>
+          </div>
+        </div>
+
+        {/* Arabic Recommendations */}
+        <div style={{
+          background: 'rgba(255, 255, 255, 0.05)',
+          borderRadius: '20px',
+          padding: '30px',
+          marginBottom: '30px',
+          border: '1px solid rgba(255, 255, 255, 0.1)'
+        }}>
+          <h3 style={{
+            fontSize: '24px',
+            fontWeight: 'bold',
+            color: '#ffffff',
+            marginBottom: '20px',
+            fontFamily: 'Cairo, Arial, sans-serif',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px'
+          }}>
+            <span>🇸🇦</span>
+            التوصيات بالعربية
+          </h3>
+          <div style={{
+            color: '#e5e7eb',
+            fontSize: '16px',
+            lineHeight: '1.8',
+            whiteSpace: 'pre-wrap',
+            fontFamily: 'Cairo, Arial, sans-serif'
+          }}>
+            {recommendations.recommendations_ar}
+          </div>
+        </div>
+
+        {/* English Recommendations */}
+        <div style={{
+          background: 'rgba(255, 255, 255, 0.05)',
+          borderRadius: '20px',
+          padding: '30px',
+          border: '1px solid rgba(255, 255, 255, 0.1)'
+        }}>
+          <h3 style={{
+            fontSize: '24px',
+            fontWeight: 'bold',
+            color: '#ffffff',
+            marginBottom: '20px',
+            fontFamily: 'Cairo, Arial, sans-serif',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px'
+          }}>
+            <span>🇬🇧</span>
+            Recommendations in English
+          </h3>
+          <div style={{
+            color: '#e5e7eb',
+            fontSize: '16px',
+            lineHeight: '1.8',
+            whiteSpace: 'pre-wrap',
+            direction: 'ltr',
+            textAlign: 'left'
+          }}>
+            {recommendations.recommendations_en}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900">
       <div className="container mx-auto px-4 py-8 max-w-6xl">
@@ -3263,6 +3437,7 @@ const RIASECInternationalResults = ({
         }}>
           {[
             { id: 'overview', label: 'نظرة عامة', icon: '📊' },
+            { id: 'recommendations', label: 'التوصيات المهنية', icon: '🎯' },
             { id: 'detailed', label: 'تحليل مفصل', icon: '🔍' },
             { id: 'technical', label: 'التفاصيل التقنية', icon: '⚙️' }
           ].map(tab => (
@@ -3298,6 +3473,7 @@ const RIASECInternationalResults = ({
         {/* Tab Content */}
         <div>
           {activeTab === 'overview' && <OverviewTab />}
+          {activeTab === 'recommendations' && <RecommendationsTab />}
           {activeTab === 'detailed' && <DetailedTab />}
           {activeTab === 'technical' && <TechnicalTab />}
         </div>

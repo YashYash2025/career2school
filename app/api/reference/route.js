@@ -102,7 +102,7 @@ export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
     const type = searchParams.get('type'); // countries, governorates, education_levels, education_grades
-    const countryCode = searchParams.get('country');
+    const countryCode = searchParams.get('country') || searchParams.get('parent'); // Support both parameter names
     const educationLevel = searchParams.get('level');
 
     let data = {};

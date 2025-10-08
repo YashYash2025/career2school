@@ -238,7 +238,9 @@ const useRIASECInternational = () => {
     questions.forEach((question, index) => {
       const answer = answers[index];
       if (answer !== undefined && answer !== null) {
-        formatted[`${question.type}${question.order || index + 1}`] = answer;
+        // تحويل -1 (لا أحب) إلى 0 حسب نظام [0, 0, 1]
+        const normalizedAnswer = answer === -1 ? 0 : answer;
+        formatted[`${question.type}${question.order || index + 1}`] = normalizedAnswer;
       }
     });
     

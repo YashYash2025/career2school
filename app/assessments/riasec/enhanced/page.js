@@ -1065,8 +1065,8 @@ const RIASECInternationalAssessment = () => {
               <div>
                 <strong>✅ حالة الإجابة:</strong><br/>
                 الإجابة الحالية: {answers[currentQuestion] !== undefined ? 
-                  (answers[currentQuestion] === 0 ? 'لا أحب (0)' : 
-                   answers[currentQuestion] === 1 ? 'أحب (1)' : 'أحب بشدة (2)') : 'لم يتم الإجابة'}<br/>
+                  (answers[currentQuestion] === -1 ? 'لا أحب (0)' : 
+                   answers[currentQuestion] === 0 ? 'محايد (0)' : 'أحب (1)') : 'لم يتم الإجابة'}<br/>
                 تم الإجابة على: {Object.keys(answers).length} من {questions.length}
               </div>
             </div>
@@ -1228,31 +1228,31 @@ const RIASECInternationalAssessment = () => {
             }}>
               {[
                 { 
-                  value: 0, 
+                  value: -1, // نستخدم -1 للعرض، لكن نحوله لـ 0 عند الحساب
                   label_ar: 'لا أحب', 
                   label_en: 'Dislike', 
                   label_fr: 'Je n\'aime pas', 
-                  emoji: '😐', 
+                  emoji: '👎', 
                   color: '#ef4444',
                   bgColor: 'rgba(239, 68, 68, 0.1)',
                   borderColor: 'rgba(239, 68, 68, 0.3)'
+                },
+                { 
+                  value: 0, 
+                  label_ar: 'محايد', 
+                  label_en: 'Neutral', 
+                  label_fr: 'Neutre', 
+                  emoji: '😐', 
+                  color: '#94a3b8',
+                  bgColor: 'rgba(148, 163, 184, 0.1)',
+                  borderColor: 'rgba(148, 163, 184, 0.3)'
                 },
                 { 
                   value: 1, 
                   label_ar: 'أحب', 
                   label_en: 'Like', 
                   label_fr: 'J\'aime', 
-                  emoji: '😊', 
-                  color: '#3b82f6',
-                  bgColor: 'rgba(59, 130, 246, 0.1)',
-                  borderColor: 'rgba(59, 130, 246, 0.3)'
-                },
-                { 
-                  value: 2, 
-                  label_ar: 'أحب بشدة', 
-                  label_en: 'Strongly Like', 
-                  label_fr: 'J\'aime beaucoup', 
-                  emoji: '😍', 
+                  emoji: '👍', 
                   color: '#10b981',
                   bgColor: 'rgba(16, 185, 129, 0.1)',
                   borderColor: 'rgba(16, 185, 129, 0.3)'
