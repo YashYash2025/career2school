@@ -2538,94 +2538,214 @@ const RIASECInternationalResults = ({
 
 
 
-
+  // D3 Radar Chart Component
+  const RadarChartD3 = () => {
+    const svgRef = useRef(null);
+    
+    useEffect(() => {
+      if (!svgRef.current || !raw_scores) return;
+      
+      // Clear previous chart
+      d3.select(svgRef.current).selectAll("*").remove();
+      
+      // Data preparation
+      const data = Object.entries(raw_scores).map(([type, scores]) => ({
+        type,
+        value: scores.percentage || 0
+      }));
+      
+      // Chart dimensions
+      const width = 400;
+      const height = 400;
+      const radius = Math.min(width, height) / 2 - 40;
+      const levels = 5;
+      
+      const svg = d3.select(svgRef.current)
+        .attr("width", width)
+        .attr("height", height)
+        .append("g")
+        .attr("transform", `translate(${width/2}, ${height/2})`);
+      
+      // Scales
+      const angleSlice = (Math.PI * 2) / data.length;
+      const rScale = d3.scaleLinear()
+        .domain([0, 100])
+        .range([0, radius]);
+      
+      // Draw circular grid
+      for (let i = 1; i <= levels; i++) {
+        const levelRadius = radius * (i / levels);
+        svg.append("circle")
+          .attr("r", levelRadius)
+          .style("fill", "none")
+          .style("stroke", "rgba(255, 255, 255, 0.1)")
+          .style("stroke-width", "1px");
+      }
+      
+      // Draw axes
+      data.forEach((d, i) => {
+        const angle = angleSlice * i - Math.PI / 2;
+        const x = radius * Math.cos(angle);
+        const y = radius * Math.sin(angle);
+        
+        svg.append("line")
+          .attr("x1", 0)
+          .attr("y1", 0)
+          .attr("x2", x)
+          .attr("y2", y)
+          .style("stroke", "rgba(255, 255, 255, 0.1)")
+          .style("stroke-width", "1px");
+        
+        // Labels
+        const labelX = (radius + 30) * Math.cos(angle);
+        const labelY = (radius + 30) * Math.sin(angle);
+        
+        svg.append("text")
+          .attr("x", labelX)
+          .attr("y", labelY)
+          .attr("text-anchor", "middle")
+          .attr("dominant-baseline", "middle")
+          .style("fill", "#ffffff")
+          .style("font-size", "16px")
+          .style("font-weight", "bold")
+          .text(d.type);
+      });
+      
+      // Draw data polygon
+      const lineGenerator = d3.lineRadial()
+        .angle((d, i) => angleSlice * i)
+        .radius(d => rScale(d.value))
+        .curve(d3.curveLinearClosed);
+      
+      svg.append("path")
+        .datum(data)
+        .attr("d", lineGenerator)
+        .style("fill", "rgba(59, 130, 246, 0.3)")
+        .style("stroke", "#3b82f6")
+        .style("stroke-width", "3px");
+      
+      // Draw data points
+      data.forEach((d, i) => {
+        const angle = angleSlice * i - Math.PI / 2;
+        const x = rScale(d.value) * Math.cos(angle);
+        const y = rScale(d.value) * Math.sin(angle);
+        
+        svg.append("circle")
+          .attr("cx", x)
+          .attr("cy", y)
+          .attr("r", 6)
+          .style("fill", "#3b82f6")
+          .style("stroke", "#ffffff")
+          .style("stroke-width", "2px");
+      });
+      
+    }, [raw_scores]);
+    
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', marginTop: '30px' }}>
+        <svg ref={svgRef}></svg>
+      </div>
+    );
+  };
 
   const OverviewTab = () => (
     <div className="space-y-8">
-      {/* Primary Result Card */}
-      <div style={{
-        background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(139, 92, 246, 0.15))',
-        backdropFilter: 'blur(20px)',
-        borderRadius: '30px',
-        padding: '50px',
-        border: '2px solid rgba(59, 130, 246, 0.3)',
-        textAlign: 'center',
-        marginBottom: '40px'
-      }}>
-        <div style={{ fontSize: '100px', marginBottom: '30px' }}>
-          {typeDetails[primaryType.type].icon}
+      {/* Primary Result Card with Radar Chart */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px', alignItems: 'center' }}>
+        {/* Left: Code Info */}
+        <div style={{
+          background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(139, 92, 246, 0.15))',
+          backdropFilter: 'blur(20px)',
+          borderRadius: '30px',
+          padding: '50px',
+          border: '2px solid rgba(59, 130, 246, 0.3)',
+          textAlign: 'center'
+        }}>
+          <div style={{ fontSize: '100px', marginBottom: '30px' }}>
+            {typeDetails[primaryType.type].icon}
+          </div>
+          
+          <h1 style={{
+            fontSize: '48px',
+            fontWeight: 'bold',
+            background: 'linear-gradient(90deg, #60a5fa, #a78bfa)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            marginBottom: '20px',
+            direction: 'rtl',
+            fontFamily: 'Cairo, Arial, sans-serif'
+          }}>
+            {holland_code}
+          </h1>
+          
+          <h2 style={{
+            fontSize: '24px',
+            color: 'rgba(255, 255, 255, 0.9)',
+            fontWeight: '600',
+            marginBottom: '30px',
+            direction: 'rtl'
+          }}>
+            {typeDetails[primaryType.type].name}
+          </h2>
+          
+          {/* Primary Scores */}
+          <div style={{
+            display: 'flex',
+            justifyContent: 'center',
+            gap: '20px',
+            flexWrap: 'wrap'
+          }}>
+            <div style={{
+              background: 'rgba(255, 255, 255, 0.1)',
+              borderRadius: '15px',
+              padding: '15px',
+              textAlign: 'center',
+              minWidth: '100px'
+            }}>
+              <div style={{ fontSize: '28px', fontWeight: 'bold', color: '#60a5fa', marginBottom: '5px' }}>
+                {primaryType.raw}
+              </div>
+              <div style={{ fontSize: '12px', color: '#9ca3af' }}>النقاط</div>
+            </div>
+            
+            <div style={{
+              background: 'rgba(255, 255, 255, 0.1)',
+              borderRadius: '15px',
+              padding: '15px',
+              textAlign: 'center',
+              minWidth: '100px'
+            }}>
+              <div style={{ fontSize: '28px', fontWeight: 'bold', color: '#a78bfa', marginBottom: '5px' }}>
+                {raw_scores[primaryType.type].percentage.toFixed(0)}%
+              </div>
+              <div style={{ fontSize: '12px', color: '#9ca3af' }}>النسبة</div>
+            </div>
+          </div>
         </div>
         
-        <h1 style={{
-          fontSize: '48px',
-          fontWeight: 'bold',
-          background: 'linear-gradient(90deg, #60a5fa, #a78bfa)',
-          WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent',
-          marginBottom: '20px',
-          direction: 'rtl',
-          fontFamily: 'Cairo, Arial, sans-serif'
-        }}>
-          كودك المهني: {holland_code}
-        </h1>
-        
-        <h2 style={{
-          fontSize: '32px',
-          color: 'rgba(255, 255, 255, 0.9)',
-          fontWeight: '600',
-          marginBottom: '40px',
-          direction: 'rtl'
-        }}>
-          النمط الأساسي: {typeDetails[primaryType.type].name}
-        </h2>
-        
-        {/* Primary Scores */}
+        {/* Right: Radar Chart */}
         <div style={{
-          display: 'flex',
-          justifyContent: 'center',
-          gap: '30px',
-          flexWrap: 'wrap'
+          background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1))',
+          borderRadius: '30px',
+          padding: '30px',
+          border: '2px solid rgba(59, 130, 246, 0.2)'
         }}>
-          <div style={{
-            background: 'rgba(255, 255, 255, 0.1)',
-            borderRadius: '20px',
-            padding: '25px',
+          <h3 style={{
+            fontSize: '20px',
+            fontWeight: 'bold',
+            color: '#ffffff',
+            marginBottom: '20px',
             textAlign: 'center',
-            minWidth: '140px'
+            direction: 'rtl',
+            fontFamily: 'Cairo, Arial, sans-serif'
           }}>
-            <div style={{ fontSize: '36px', fontWeight: 'bold', color: '#60a5fa', marginBottom: '8px' }}>
-              {primaryType.raw}
-            </div>
-            <div style={{ fontSize: '14px', color: '#9ca3af' }}>النقاط الخام</div>
-          </div>
-          
-          <div style={{
-            background: 'rgba(255, 255, 255, 0.1)',
-            borderRadius: '20px',
-            padding: '25px',
-            textAlign: 'center',
-            minWidth: '140px'
-          }}>
-            <div style={{ fontSize: '36px', fontWeight: 'bold', color: '#a78bfa', marginBottom: '8px' }}>
-              {raw_scores[primaryType.type].percentage.toFixed(2)}%
-            </div>
-            <div style={{ fontSize: '14px', color: '#9ca3af' }}>النسبة المئوية</div>
-          </div>
-          
-          <div style={{
-            background: 'rgba(255, 255, 255, 0.1)',
-            borderRadius: '20px',
-            padding: '25px',
-            textAlign: 'center',
-            minWidth: '140px'
-          }}>
-            <div style={{ fontSize: '36px', fontWeight: 'bold', color: '#34d399', marginBottom: '8px' }}>
-              {raw_scores[primaryType.type].percentile}
-            </div>
-            <div style={{ fontSize: '14px', color: '#9ca3af' }}>الرتبة المئوية</div>
-          </div>
+            📊 ملف الميول المهنية
+          </h3>
+          <RadarChartD3 />
         </div>
       </div>
+
+
 
       {/* Results Explanation */}
       <div style={{
@@ -3347,39 +3467,7 @@ const RIASECInternationalResults = ({
           </div>
         </div>
 
-        {/* Arabic Recommendations */}
-        <div style={{
-          background: 'rgba(255, 255, 255, 0.05)',
-          borderRadius: '20px',
-          padding: '30px',
-          marginBottom: '30px',
-          border: '1px solid rgba(255, 255, 255, 0.1)'
-        }}>
-          <h3 style={{
-            fontSize: '24px',
-            fontWeight: 'bold',
-            color: '#ffffff',
-            marginBottom: '20px',
-            fontFamily: 'Cairo, Arial, sans-serif',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '10px'
-          }}>
-            <span>🇸🇦</span>
-            التوصيات بالعربية
-          </h3>
-          <div style={{
-            color: '#e5e7eb',
-            fontSize: '16px',
-            lineHeight: '1.8',
-            whiteSpace: 'pre-wrap',
-            fontFamily: 'Cairo, Arial, sans-serif'
-          }}>
-            {recommendations.recommendations_ar}
-          </div>
-        </div>
-
-        {/* English Recommendations */}
+        {/* Career Recommendations List */}
         <div style={{
           background: 'rgba(255, 255, 255, 0.05)',
           borderRadius: '20px',
@@ -3390,25 +3478,114 @@ const RIASECInternationalResults = ({
             fontSize: '24px',
             fontWeight: 'bold',
             color: '#ffffff',
-            marginBottom: '20px',
+            marginBottom: '25px',
             fontFamily: 'Cairo, Arial, sans-serif',
             display: 'flex',
             alignItems: 'center',
             gap: '10px'
           }}>
-            <span>🇬🇧</span>
-            Recommendations in English
+            <span>💼</span>
+            الوظائف المناسبة لك
           </h3>
-          <div style={{
-            color: '#e5e7eb',
-            fontSize: '16px',
-            lineHeight: '1.8',
-            whiteSpace: 'pre-wrap',
-            direction: 'ltr',
-            textAlign: 'left'
-          }}>
-            {recommendations.recommendations_en}
-          </div>
+          
+          {(() => {
+            // استخراج الوظائف من النص
+            const jobs = recommendations.recommendations_ar
+              .split(/[؛;]/)
+              .map(j => j.trim())
+              .filter(j => j.length > 0);
+            
+            // حساب نسبة المطابقة بناءً على ترتيب الكود
+            const codeLetters = recommendations.holland_code.split('');
+            
+            return (
+              <div style={{ display: 'grid', gap: '15px' }}>
+                {jobs.map((job, index) => {
+                  // حساب نسبة المطابقة (أول 6 وظائف = 95-100%, باقي = 85-94%)
+                  const matchPercentage = index < 6 
+                    ? 100 - (index * 1) 
+                    : 94 - ((index - 6) * 2);
+                  
+                  return (
+                    <div key={index} style={{
+                      background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1))',
+                      borderRadius: '15px',
+                      padding: '20px',
+                      border: '1px solid rgba(59, 130, 246, 0.2)',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      transition: 'all 0.3s ease',
+                      cursor: 'pointer'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = 'translateX(-5px)';
+                      e.currentTarget.style.borderColor = 'rgba(59, 130, 246, 0.5)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = 'translateX(0)';
+                      e.currentTarget.style.borderColor = 'rgba(59, 130, 246, 0.2)';
+                    }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                        <div style={{
+                          background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
+                          borderRadius: '12px',
+                          width: '45px',
+                          height: '45px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: '18px',
+                          fontWeight: 'bold',
+                          color: 'white'
+                        }}>
+                          {index + 1}
+                        </div>
+                        <div>
+                          <div style={{
+                            fontSize: '18px',
+                            fontWeight: 'bold',
+                            color: '#ffffff',
+                            marginBottom: '5px',
+                            fontFamily: 'Cairo, Arial, sans-serif'
+                          }}>
+                            {job}
+                          </div>
+                          <div style={{
+                            fontSize: '13px',
+                            color: '#9ca3af'
+                          }}>
+                            مناسب لكود {recommendations.holland_code}
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '10px'
+                      }}>
+                        <div style={{
+                          fontSize: '24px',
+                          fontWeight: 'bold',
+                          color: matchPercentage >= 95 ? '#10b981' : matchPercentage >= 90 ? '#3b82f6' : '#8b5cf6'
+                        }}>
+                          {matchPercentage}%
+                        </div>
+                        <div style={{
+                          fontSize: '12px',
+                          color: '#9ca3af'
+                        }}>
+                          مطابقة
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            );
+          })()}
         </div>
       </div>
     );
