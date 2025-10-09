@@ -30,18 +30,27 @@ export default function ProfileTab({ user, onUpdate }) {
   }, [user]);
 
   const loadProfileData = async () => {
-    if (!user?.id) return;
+    if (!user?.id) {
+      console.log('⚠️ No user ID available');
+      return;
+    }
 
     try {
       setLoading(true);
+      console.log('📡 Loading profile for user:', user.id);
+      
       const { data, error } = await supabase
         .from('user_profiles')
         .select('*')
         .eq('user_id', user.id)
         .single();
+      
+      console.log('📊 Query result:', { data, error });
 
       if (error) {
-        console.error('Error loading profile:', error);
+        console.error('❌ Error loading profile:', error);
+        console.error('Error details:', error.message, error.details, error.hint);
+        console.error('User ID:', user.id);
         return;
       }
 
