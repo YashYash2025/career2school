@@ -1,10 +1,14 @@
 'use client'
 
 import Link from 'next/link'
+import SharedNavigation from '../components/SharedNavigation'
 
 export default function About() {
   return (
     <>
+      {/* Shared Navigation */}
+      <SharedNavigation />
+      
       {/* Animated Background */}
       <div className="bg-animation"></div>
       <div className="floating-shapes">

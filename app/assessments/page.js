@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useAppContext, selectors } from '../context/AppContext'
+import SharedNavigation from '../components/SharedNavigation'
 
 export default function Assessments() {
   const { state, actions } = useAppContext()
@@ -294,6 +295,9 @@ export default function Assessments() {
 
   return (
     <>
+      {/* Shared Navigation */}
+      <SharedNavigation />
+      
       {/* Animated Background */}
       <div style={{
         position: 'fixed',

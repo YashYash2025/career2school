@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import SharedNavigation from '../components/SharedNavigation'
 
 export default function Careers() {
   const careerPaths = [
@@ -48,6 +49,9 @@ export default function Careers() {
 
   return (
     <>
+      {/* Shared Navigation */}
+      <SharedNavigation />
+      
       {/* Animated Background */}
       <div className="bg-animation"></div>
       <div className="floating-shapes">
