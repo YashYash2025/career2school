@@ -39,6 +39,35 @@ export default function ProfileTab({ user, onUpdate }) {
       setLoading(true);
       console.log('📡 Loading profile for user:', user.id);
       
+      // Get current session to ensure user is authenticated
+      const { data: { session } } = await supabase.auth.getSession();
+      console.log('🔐 Session status:', session ? 'Authenticated' : 'Not authenticated');
+      
+      // If no session, try to load from API instead
+      if (!session) {
+        console.log('⚠️ No active session, fetching via API...');
+        const response = await fetch(`/api/user/profile?user_id=${user.id}`);
+        if (response.ok) {
+          const result = await response.json();
+          if (result.success && result.profile) {
+            console.log('✅ Profile loaded via API:', result.profile);
+            setFormData({
+              first_name: result.profile.first_name || '',
+              last_name: result.profile.last_name || '',
+              phone: result.profile.phone || '',
+              birth_date: result.profile.birth_date || '',
+              city: result.profile.city || '',
+              school_name: result.profile.school_name || '',
+              gender: result.profile.gender || '',
+              education_level_code: result.profile.education_level_code || '',
+              current_grade_code: result.profile.current_grade_code || ''
+            });
+            setLoading(false);
+            return;
+          }
+        }
+      }
+      
       const { data, error } = await supabase
         .from('user_profiles')
         .select('*')
