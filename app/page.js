@@ -17,6 +17,12 @@ export default function Home() {
 
   // Check login status
   useEffect(() => {
+    console.log('🔍 Checking login status:', {
+      isLoggedIn: selectors.isLoggedIn(state),
+      userData: selectors.getUserData(state),
+      localStorage: localStorage.getItem('userData')
+    })
+    
     if (selectors.isLoggedIn(state)) {
       setIsLoggedIn(true)
       setUserInfo(selectors.getUserData(state))
@@ -28,6 +34,8 @@ export default function Home() {
 
   // Handle logout
   const handleLogout = () => {
+    console.log('🚪 Logout called from home page')
+    console.trace('Logout stack trace')
     actions.logout()
     setIsLoggedIn(false)
     setUserInfo({ name: '', email: '' })
