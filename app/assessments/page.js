@@ -309,47 +309,6 @@ export default function Assessments() {
         zIndex: -1
       }}></div>
 
-      {/* Navigation */}
-      <div style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        height: '70px',
-        background: 'rgba(15, 15, 30, 0.98)',
-        backdropFilter: 'blur(20px)',
-        borderBottom: '2px solid rgba(102, 126, 234, 0.3)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: '0 40px',
-        zIndex: 1000,
-        boxShadow: '0 10px 30px rgba(0, 0, 0, 0.5)'
-      }}>
-        <Link href="/" style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: '12px',
-          padding: '12px 24px',
-          background: 'linear-gradient(135deg, #667eea, #764ba2)',
-          borderRadius: '50px',
-          color: 'white',
-          textDecoration: 'none',
-          fontWeight: 'bold',
-          transition: 'all 0.3s ease',
-          boxShadow: '0 5px 15px rgba(118, 75, 162, 0.4)'
-        }}>
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M15 19L8 12L15 5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-          العودة للرئيسية
-        </Link>
-        <div style={{ color: '#ffffff', fontSize: '24px', fontWeight: 'bold' }}>
-          منصة التقييمات الذكية
-        </div>
-        <div></div>
-      </div>
-
       {/* Main Content */}
       <main style={{ 
         paddingTop: '120px', 

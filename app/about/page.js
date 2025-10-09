@@ -17,23 +17,6 @@ export default function About() {
         <div className="shape shape3"></div>
       </div>
 
-      {/* Navigation */}
-      <nav>
-        <div className="nav-container">
-          <div className="logo">School2Career</div>
-          <div className="nav-links">
-            <Link href="/" className="nav-link">الرئيسية</Link>
-            <Link href="/assessments" className="nav-link">التقييمات</Link>
-            <Link href="/careers" className="nav-link">المهن</Link>
-            <Link href="/about" className="nav-link">عن المنصة</Link>
-            <Link href="/login" className="nav-link">تسجيل الدخول</Link>
-            <Link href="/signup">
-              <button className="cta-button">ابدأ الآن</button>
-            </Link>
-          </div>
-        </div>
-      </nav>
-
       {/* Main Content */}
       <main style={{ paddingTop: '120px', minHeight: '100vh' }}>
         <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '40px 50px' }}>
