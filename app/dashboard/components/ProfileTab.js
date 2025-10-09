@@ -43,7 +43,7 @@ export default function ProfileTab({ user, onUpdate }) {
         .from('user_profiles')
         .select('*')
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
       
       console.log('📊 Query result:', { data, error });
 
@@ -55,6 +55,7 @@ export default function ProfileTab({ user, onUpdate }) {
       }
 
       if (data) {
+        console.log('✅ Profile data loaded:', data);
         setFormData({
           first_name: data.first_name || '',
           last_name: data.last_name || '',
@@ -66,6 +67,8 @@ export default function ProfileTab({ user, onUpdate }) {
           education_level_code: data.education_level_code || '',
           current_grade_code: data.current_grade_code || ''
         });
+      } else {
+        console.log('⚠️ No profile data found for user');
       }
     } catch (error) {
       console.error('Error:', error);
