@@ -14,32 +14,31 @@ export default function SaveResultsButton({ algorithmResults, onSaveSuccess, onS
   const [error, setError] = useState(null);
   const [user, setUser] = useState(null);
 
-  // التحقق من حالة تسجيل الدخول
+  // Check authentication status
   useEffect(() => {
     const checkAuth = async () => {
-      // تحقق من Supabase session
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (session && session.user) {
-        setUser(session.user);
-      } else {
-        // تحقق من localStorage
-        const storedUserData = localStorage.getItem('userData');
-        if (storedUserData) {
-          const userData = JSON.parse(storedUserData);
-          setUser({ id: userData.id });
-        }
-      }
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
     };
-
     checkAuth();
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user || null);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   const handleSave = async () => {
     if (!user) {
-      // إذا لم يكن مسجل دخول، وجهه لصفحة تسجيل الدخول
-      alert('يرجى تسجيل الدخول أولاً لحفظ النتائج');
-      window.location.href = '/login';
+      // Redirect to login
+      window.location.href = '/login?redirect=/assessments/riasec/enhanced';
+      return;
+    }
+
+    if (!algorithmResults) {
+      setError('لا توجد نتائج لحفظها');
       return;
     }
 
@@ -47,41 +46,58 @@ export default function SaveResultsButton({ algorithmResults, onSaveSuccess, onS
     setError(null);
 
     try {
-      console.log('💾 حفظ النتائج...');
-      console.log('📊 البيانات:', algorithmResults);
+      // Get session token
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        throw new Error('No active session');
+      }
 
+      // Prepare data
+      const saveData = {
+        holland_code: algorithmResults.holland_code,
+        raw_scores: algorithmResults.raw_scores,
+        ranking: algorithmResults.ranking,
+        confidence_score: calculateConfidenceScore(algorithmResults.raw_scores)
+      };
+
+      console.log('💾 Saving results:', saveData);
+
+      // Call API
       const response = await fetch('/api/assessments/riasec/save', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
         },
-        body: JSON.stringify({
-          user_id: user.id,
-          holland_code: algorithmResults.holland_code,
-          raw_scores: algorithmResults.raw_scores,
-          ranking: algorithmResults.ranking,
-          confidence_score: algorithmResults.confidence_score || 0
-        })
+        body: JSON.stringify(saveData)
       });
 
       const result = await response.json();
 
-      if (result.success) {
-        console.log('✅ تم حفظ النتائج بنجاح');
-        setIsSaved(true);
-        if (onSaveSuccess) {
-          onSaveSuccess(result);
-        }
-      } else {
-        console.error('❌ فشل حفظ النتائج:', result.error);
-        setError(result.error);
-        if (onSaveError) {
-          onSaveError(result.error);
-        }
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || 'فشل حفظ النتائج');
       }
+
+      console.log('✅ Results saved:', result);
+
+      setIsSaved(true);
+      
+      // Call success callback
+      if (onSaveSuccess) {
+        onSaveSuccess(result);
+      }
+
+      // Show success message
+      setTimeout(() => {
+        alert('✅ تم حفظ النتائج بنجاح! يمكنك مراجعتها في لوحة التحكم.');
+      }, 100);
+
     } catch (err) {
-      console.error('❌ خطأ في حفظ النتائج:', err);
-      setError('حدث خطأ أثناء حفظ النتائج');
+      console.error('❌ Save error:', err);
+      setError(err.message);
+      
+      // Call error callback
       if (onSaveError) {
         onSaveError(err.message);
       }
@@ -90,128 +106,160 @@ export default function SaveResultsButton({ algorithmResults, onSaveSuccess, onS
     }
   };
 
-  // إذا لم يكن مسجل دخول
+  // Calculate confidence score
+  const calculateConfidenceScore = (scores) => {
+    if (!scores || typeof scores !== 'object') return 0;
+    
+    const percentages = Object.values(scores)
+      .map(scoreObj => parseFloat(scoreObj.percentage) || 0)
+      .filter(val => !isNaN(val));
+    
+    if (percentages.length === 0) return 0;
+    
+    const max = Math.max(...percentages);
+    const min = Math.min(...percentages);
+    const range = max - min;
+    const differentiation = range / (max || 1);
+    
+    return Math.round(Math.min(100, (differentiation * 70) + (max / 100 * 30)));
+  };
+
+  // If already saved, show success state
+  if (isSaved) {
+    return (
+      <button
+        disabled
+        style={{
+          padding: '15px 30px',
+          background: 'linear-gradient(135deg, #10b981, #059669)',
+          color: 'white',
+          border: 'none',
+          borderRadius: '15px',
+          fontSize: '16px',
+          fontWeight: 'bold',
+          cursor: 'not-allowed',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '10px',
+          fontFamily: 'Cairo, Arial, sans-serif',
+          boxShadow: '0 4px 15px rgba(16, 185, 129, 0.3)',
+          opacity: 0.8
+        }}
+      >
+        <span>✅</span>
+        <span>النتائج محفوظة</span>
+      </button>
+    );
+  }
+
+  // If not logged in
   if (!user) {
     return (
       <button
-        onClick={() => window.location.href = '/login'}
+        onClick={handleSave}
         style={{
           padding: '15px 30px',
-          background: 'linear-gradient(135deg, #667eea, #764ba2)',
+          background: 'linear-gradient(135deg, #f59e0b, #d97706)',
           color: 'white',
           border: 'none',
           borderRadius: '15px',
           fontSize: '16px',
           fontWeight: 'bold',
           cursor: 'pointer',
-          transition: 'all 0.3s ease',
-          fontFamily: 'Cairo, Arial, sans-serif',
           display: 'flex',
           alignItems: 'center',
           gap: '10px',
-          boxShadow: '0 4px 15px rgba(102, 126, 234, 0.3)'
+          fontFamily: 'Cairo, Arial, sans-serif',
+          boxShadow: '0 4px 15px rgba(245, 158, 11, 0.3)',
+          transition: 'all 0.3s ease'
         }}
         onMouseEnter={(e) => {
           e.currentTarget.style.transform = 'translateY(-2px)';
-          e.currentTarget.style.boxShadow = '0 6px 20px rgba(102, 126, 234, 0.4)';
+          e.currentTarget.style.boxShadow = '0 6px 20px rgba(245, 158, 11, 0.4)';
         }}
         onMouseLeave={(e) => {
           e.currentTarget.style.transform = 'translateY(0)';
-          e.currentTarget.style.boxShadow = '0 4px 15px rgba(102, 126, 234, 0.3)';
+          e.currentTarget.style.boxShadow = '0 4px 15px rgba(245, 158, 11, 0.3)';
         }}
       >
-        <span style={{ fontSize: '20px' }}>🔐</span>
+        <span>🔐</span>
         <span>تسجيل الدخول لحفظ النتائج</span>
       </button>
     );
   }
 
-  // إذا تم الحفظ بالفعل
-  if (isSaved) {
-    return (
-      <div
-        style={{
-          padding: '15px 30px',
-          background: 'linear-gradient(135deg, #10b981, #059669)',
-          color: 'white',
-          borderRadius: '15px',
-          fontSize: '16px',
-          fontWeight: 'bold',
-          fontFamily: 'Cairo, Arial, sans-serif',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '10px',
-          boxShadow: '0 4px 15px rgba(16, 185, 129, 0.3)'
-        }}
-      >
-        <span style={{ fontSize: '20px' }}>✅</span>
-        <span>تم حفظ النتائج بنجاح!</span>
-      </div>
-    );
-  }
-
-  // زر الحفظ
+  // Normal save button
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', alignItems: 'center' }}>
       <button
         onClick={handleSave}
         disabled={isSaving}
         style={{
           padding: '15px 30px',
           background: isSaving 
-            ? 'linear-gradient(135deg, #9ca3af, #6b7280)' 
-            : 'linear-gradient(135deg, #667eea, #764ba2)',
+            ? 'linear-gradient(135deg, #6b7280, #4b5563)'
+            : 'linear-gradient(135deg, #3b82f6, #2563eb)',
           color: 'white',
           border: 'none',
           borderRadius: '15px',
           fontSize: '16px',
           fontWeight: 'bold',
           cursor: isSaving ? 'not-allowed' : 'pointer',
-          transition: 'all 0.3s ease',
-          fontFamily: 'Cairo, Arial, sans-serif',
           display: 'flex',
           alignItems: 'center',
           gap: '10px',
-          boxShadow: '0 4px 15px rgba(102, 126, 234, 0.3)',
+          fontFamily: 'Cairo, Arial, sans-serif',
+          boxShadow: '0 4px 15px rgba(59, 130, 246, 0.3)',
+          transition: 'all 0.3s ease',
           opacity: isSaving ? 0.7 : 1
         }}
         onMouseEnter={(e) => {
           if (!isSaving) {
             e.currentTarget.style.transform = 'translateY(-2px)';
-            e.currentTarget.style.boxShadow = '0 6px 20px rgba(102, 126, 234, 0.4)';
+            e.currentTarget.style.boxShadow = '0 6px 20px rgba(59, 130, 246, 0.4)';
           }
         }}
         onMouseLeave={(e) => {
           if (!isSaving) {
             e.currentTarget.style.transform = 'translateY(0)';
-            e.currentTarget.style.boxShadow = '0 4px 15px rgba(102, 126, 234, 0.3)';
+            e.currentTarget.style.boxShadow = '0 4px 15px rgba(59, 130, 246, 0.3)';
           }
         }}
       >
-        <span style={{ fontSize: '20px' }}>
-          {isSaving ? '⏳' : '💾'}
-        </span>
-        <span>
-          {isSaving ? 'جاري الحفظ...' : 'حفظ النتائج في حسابي'}
-        </span>
+        {isSaving ? (
+          <>
+            <span style={{ animation: 'spin 1s linear infinite' }}>⏳</span>
+            <span>جاري الحفظ...</span>
+          </>
+        ) : (
+          <>
+            <span>💾</span>
+            <span>حفظ النتائج في حسابي</span>
+          </>
+        )}
       </button>
 
       {error && (
-        <div
-          style={{
-            padding: '10px 15px',
-            background: 'rgba(239, 68, 68, 0.1)',
-            border: '1px solid rgba(239, 68, 68, 0.3)',
-            borderRadius: '10px',
-            color: '#ef4444',
-            fontSize: '14px',
-            fontFamily: 'Cairo, Arial, sans-serif',
-            textAlign: 'center'
-          }}
-        >
+        <div style={{
+          padding: '10px 20px',
+          background: 'rgba(239, 68, 68, 0.1)',
+          border: '1px solid rgba(239, 68, 68, 0.3)',
+          borderRadius: '10px',
+          color: '#ef4444',
+          fontSize: '14px',
+          fontFamily: 'Cairo, Arial, sans-serif',
+          textAlign: 'center'
+        }}>
           ❌ {error}
         </div>
       )}
+
+      <style jsx>{`
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
     </div>
   );
 }

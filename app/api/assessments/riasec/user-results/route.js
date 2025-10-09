@@ -1,63 +1,84 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
-// إنشاء Supabase client
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-);
-
 export async function GET(request) {
   try {
-    console.log('📊 جلب نتائج RIASEC للمستخدم...');
-
-    // 1. قراءة المعاملات من الـ URL
+    // 1. Get query parameters
     const { searchParams } = new URL(request.url);
-    const user_id = searchParams.get('user_id');
-    const limit = parseInt(searchParams.get('limit') || '10');
-    const offset = parseInt(searchParams.get('offset') || '0');
+    const limit = parseInt(searchParams.get('limit')) || 10;
+    const offset = parseInt(searchParams.get('offset')) || 0;
 
-    console.log('📋 المعاملات:', { user_id, limit, offset });
+    console.log('📥 Get User Results Request:', { limit, offset });
 
-    // 2. التحقق من صحة البيانات
-    if (!user_id) {
-      console.error('❌ معرف المستخدم مفقود');
-      return NextResponse.json(
-        { success: false, error: 'معرف المستخدم مطلوب' },
-        { status: 400 }
-      );
-    }
+    // 2. Get user from Supabase session
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+      {
+        global: {
+          headers: {
+            Authorization: request.headers.get('Authorization') || ''
+          }
+        }
+      }
+    );
 
-    // 3. جلب التقييمات من قاعدة البيانات
-    console.log('🔍 البحث في قاعدة البيانات...');
-    
-    const { data, error, count } = await supabase
-      .from('assessment_results')
-      .select('*', { count: 'exact' })
-      .eq('user_id', user_id)
-      .order('created_at', { ascending: false })
-      .range(offset, offset + limit - 1);
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
 
-    if (error) {
-      console.error('❌ خطأ في جلب البيانات:', error);
+    if (authError || !user) {
+      console.error('❌ Authentication error:', authError);
       return NextResponse.json(
         { 
           success: false, 
-          error: 'فشل جلب النتائج', 
-          details: error.message 
+          error: 'يرجى تسجيل الدخول لعرض النتائج',
+          details: authError?.message || 'User not authenticated'
+        },
+        { status: 401 }
+      );
+    }
+
+    console.log('✅ User authenticated:', user.id);
+
+    // 3. Get total count
+    const { count, error: countError } = await supabase
+      .from('assessment_results')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', user.id)
+      .not('detailed_scores->assessment_type', 'is', null)
+      .eq('detailed_scores->>assessment_type', 'RIASEC');
+
+    if (countError) {
+      console.error('❌ Count error:', countError);
+    }
+
+    // 4. Fetch user's RIASEC assessments
+    const { data: assessments, error: fetchError } = await supabase
+      .from('assessment_results')
+      .select('*')
+      .eq('user_id', user.id)
+      .not('detailed_scores->assessment_type', 'is', null)
+      .eq('detailed_scores->>assessment_type', 'RIASEC')
+      .order('created_at', { ascending: false })
+      .range(offset, offset + limit - 1);
+
+    if (fetchError) {
+      console.error('❌ Fetch error:', fetchError);
+      return NextResponse.json(
+        { 
+          success: false, 
+          error: 'حدث خطأ أثناء جلب البيانات',
+          details: fetchError.message
         },
         { status: 500 }
       );
     }
 
-    console.log(`✅ تم جلب ${data?.length || 0} تقييم`);
-
-    // 4. معالجة البيانات وإضافة معلومات إضافية
-    const assessments = (data || []).map(assessment => {
+    // 5. Transform data for frontend
+    const transformedAssessments = assessments.map(assessment => {
       const detailed_scores = assessment.detailed_scores || {};
       const holland_code = detailed_scores.holland_code || '';
       const ranking = detailed_scores.ranking || [];
-      const primary_type = ranking.length > 0 ? ranking[0] : null;
+      const primary_type = ranking[0] || { type: holland_code[0], percentage: 0 };
 
       return {
         id: assessment.id,
@@ -66,31 +87,61 @@ export async function GET(request) {
         ranking,
         completed_date: assessment.created_at,
         confidence_score: detailed_scores.confidence_score || 0,
-        primary_type: primary_type ? {
+        primary_type: {
           type: primary_type.type,
-          percentage: primary_type.percentage
-        } : null
+          name: getTypeName(primary_type.type),
+          percentage: primary_type.percentage,
+          icon: getTypeIcon(primary_type.type)
+        },
+        profile_type: assessment.profile_type,
+        profile_description: assessment.profile_description
       };
     });
 
-    // 5. إرجاع النتيجة
+    console.log(`✅ Found ${transformedAssessments.length} assessments`);
+
     return NextResponse.json({
       success: true,
-      assessments,
-      total: count || 0,
+      assessments: transformedAssessments,
+      total: count || transformedAssessments.length,
       limit,
       offset
     });
 
   } catch (error) {
-    console.error('❌ خطأ في API:', error);
+    console.error('❌ Unexpected error:', error);
     return NextResponse.json(
       { 
         success: false, 
-        error: 'حدث خطأ في الخادم', 
-        details: error.message 
+        error: 'حدث خطأ غير متوقع',
+        details: error.message
       },
       { status: 500 }
     );
   }
+}
+
+// Helper functions
+function getTypeName(type) {
+  const names = {
+    R: 'الواقعي',
+    I: 'الاستقصائي',
+    A: 'الفني',
+    S: 'الاجتماعي',
+    E: 'المغامر',
+    C: 'التقليدي'
+  };
+  return names[type] || type;
+}
+
+function getTypeIcon(type) {
+  const icons = {
+    R: '🔧',
+    I: '🔬',
+    A: '🎨',
+    S: '🤝',
+    E: '💼',
+    C: '📊'
+  };
+  return icons[type] || '🎯';
 }

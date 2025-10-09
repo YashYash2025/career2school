@@ -4,6 +4,7 @@ import { useState, useEffect, Suspense } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@supabase/supabase-js'
+import AssessmentsList from './components/AssessmentsList'
 
 // إنشاء عميل Supabase
 const supabase = createClient(
@@ -396,80 +397,8 @@ function DashboardContent() {
           }}>
             
             {/* Recent Assessments */}
-            <div style={{
-              background: 'var(--card-bg)',
-              borderRadius: '20px',
-              padding: '30px',
-              border: '1px solid rgba(255, 255, 255, 0.1)'
-            }}>
-              <h2 style={{ 
-                fontSize: '24px',
-                marginBottom: '20px',
-                color: 'var(--text-primary)'
-              }}>
-                التقييمات المكتملة
-              </h2>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                {assessments && assessments.length > 0 ? (
-                  assessments.map((assessment) => (
-                    <div key={assessment.id} style={{
-                      background: 'rgba(255, 255, 255, 0.05)',
-                      borderRadius: '15px',
-                      padding: '20px',
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center'
-                    }}>
-                      <div>
-                        <h3 style={{ color: 'var(--text-primary)', marginBottom: '5px' }}>
-                          {assessment.title}
-                        </h3>
-                        <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>
-                          {new Date(assessment.completed_date).toLocaleDateString('ar-EG')}
-                        </p>
-                      </div>
-                      <div style={{
-                        background: assessment.score >= 90 ? 'var(--accent-neon)' : 
-                                   assessment.score >= 80 ? 'var(--accent-purple)' : 
-                                   'var(--accent-pink)',
-                        color: 'var(--dark-bg)',
-                        padding: '8px 15px',
-                        borderRadius: '20px',
-                        fontWeight: 'bold'
-                      }}>
-                        {assessment.score}%
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <div style={{
-                    textAlign: 'center',
-                    color: 'var(--text-secondary)',
-                    padding: '40px 20px'
-                  }}>
-                    <div style={{ fontSize: '48px', marginBottom: '20px' }}>📊</div>
-                    <p>لم تقم بإكمال أي تقييم بعد</p>
-                    <p style={{ fontSize: '14px', marginTop: '10px' }}>ابدأ أول تقييم لك الآن!</p>
-                  </div>
-                )}
-              </div>
-              <Link href="/assessments">
-                <button style={{
-                  width: '100%',
-                  marginTop: '20px',
-                  padding: '15px',
-                  background: 'var(--primary-gradient)',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '15px',
-                  fontSize: '16px',
-                  cursor: 'pointer',
-                  transition: 'all 0.3s ease'
-                }}>
-                  ابدأ تقييم جديد
-                </button>
-              </Link>
-            </div>
+            {/* Assessments List Component */}
+            <AssessmentsList userId={user?.id} />
 
             {/* Career Recommendations */}
             <div style={{
