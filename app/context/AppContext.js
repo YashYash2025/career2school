@@ -305,16 +305,27 @@ export function AppProvider({ children }) {
   
   // Load saved state from localStorage
   useEffect(() => {
+    console.log('🔄 AppProvider: Loading state from localStorage...')
     try {
       const savedUserData = localStorage.getItem('userData')
       const savedToken = localStorage.getItem('userToken')
       const savedPreferences = localStorage.getItem('userPreferences')
       
+      console.log('📦 Found in localStorage:', {
+        hasUserData: !!savedUserData,
+        hasToken: !!savedToken,
+        userData: savedUserData ? JSON.parse(savedUserData) : null
+      })
+      
       if (savedUserData && savedToken) {
+        const userData = JSON.parse(savedUserData)
+        console.log('✅ Dispatching LOGIN_SUCCESS with:', userData)
         dispatch({
           type: ACTION_TYPES.LOGIN_SUCCESS,
-          payload: JSON.parse(savedUserData)
+          payload: userData
         })
+      } else {
+        console.log('⚠️ No user data found in localStorage')
       }
       
       if (savedPreferences) {
@@ -324,7 +335,7 @@ export function AppProvider({ children }) {
         })
       }
     } catch (error) {
-      console.error('Error loading saved state:', error)
+      console.error('❌ Error loading saved state:', error)
     }
   }, [])
   
