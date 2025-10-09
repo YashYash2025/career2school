@@ -720,7 +720,8 @@ export default function Signup() {
         localStorage.setItem('userData', JSON.stringify(userData))
         localStorage.setItem('userToken', userData.token)
         
-        alert('تم إنشاء الحساب بنجاح! مرحباً ' + (result.user.profile.full_name || `${formData.firstName} ${formData.lastName}`))
+        // رسالة تأكيد مع تنبيه للإيميل
+        alert(`✅ تم إنشاء الحساب بنجاح! مرحباً ${result.user.profile.full_name || `${formData.firstName} ${formData.lastName}`}\n\n📧 يرجى تأكيد حسابك من خلال الرابط المرسل إلى بريدك الإلكتروني: ${formData.email}\n\n💡 تحقق من صندوق الوارد أو البريد المزعج (Spam)`)
         
         setIsLoading(false)
         router.push('/dashboard')
