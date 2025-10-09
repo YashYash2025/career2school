@@ -54,17 +54,30 @@ export async function POST(request) {
     }
 
     console.log('🔐 Creating user account...')
-    // إنشاء حساب المستخدم في Supabase Auth
-    const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+    // إنشاء حساب المستخدم في Supabase Auth باستخدام signUp
+    const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
       password,
-      email_confirm: true // تأكيد الإيميل تلقائياً
+      options: {
+        data: {
+          first_name,
+          last_name
+        }
+      }
     })
 
     if (authError) {
       console.error('❌ Auth error:', authError)
       return NextResponse.json(
         { error: `خطأ في إنشاء الحساب: ${authError.message}` },
+        { status: 400 }
+      )
+    }
+
+    if (!authData.user) {
+      console.error('❌ No user returned from signUp')
+      return NextResponse.json(
+        { error: 'فشل إنشاء الحساب' },
         { status: 400 }
       )
     }

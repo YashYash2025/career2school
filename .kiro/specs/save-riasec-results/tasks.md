@@ -133,6 +133,7 @@
 
 - [x] 12. تحسينات UI/UX
 
+
   - إضافة animations للـ transitions
   - تحسين responsive design للموبايل
   - إضافة tooltips للأزرار
