@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@supabase/supabase-js'
+import { useAppContext } from '../context/AppContext'
 
 // إنشاء عميل Supabase للواجهة الأمامية
 const supabase = createClient(
@@ -17,6 +18,7 @@ export default function Login() {
   const [isLoading, setIsLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const router = useRouter()
+  const { actions } = useAppContext()
 
   // دالة تسجيل الدخول بـ Google
   const handleGoogleLogin = async () => {
@@ -102,8 +104,13 @@ export default function Login() {
           token: result.session.access_token
         }
         
+        // Save to localStorage
         localStorage.setItem('userData', JSON.stringify(userData))
         localStorage.setItem('userToken', userData.token)
+        
+        // Update Context
+        console.log('🔄 Updating Context with user data:', userData)
+        actions.login(userData)
         
         alert('مرحباً بك مرة أخرى، ' + userData.name + '!')
         
