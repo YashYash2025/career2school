@@ -1,17 +1,69 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+
+import { createClient } from '@supabase/supabase-js';
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+);
 
 export default function ProfileTab({ user, onUpdate }) {
   const [isEditing, setIsEditing] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({
-    first_name: user?.profile?.first_name || '',
-    last_name: user?.profile?.last_name || '',
-    phone: user?.profile?.phone || '',
-    birth_date: user?.profile?.birth_date || '',
-    city: user?.profile?.city || '',
-    school_name: user?.profile?.school_name || '',
+    first_name: '',
+    last_name: '',
+    phone: '',
+    birth_date: '',
+    city: '',
+    school_name: '',
+    gender: '',
+    education_level_code: '',
+    current_grade_code: ''
   });
+
+  // Load profile data from Supabase
+  useEffect(() => {
+    loadProfileData();
+  }, [user]);
+
+  const loadProfileData = async () => {
+    if (!user?.id) return;
+
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('user_profiles')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
+
+      if (error) {
+        console.error('Error loading profile:', error);
+        return;
+      }
+
+      if (data) {
+        setFormData({
+          first_name: data.first_name || '',
+          last_name: data.last_name || '',
+          phone: data.phone || '',
+          birth_date: data.birth_date || '',
+          city: data.city || '',
+          school_name: data.school_name || '',
+          gender: data.gender || '',
+          education_level_code: data.education_level_code || '',
+          current_grade_code: data.current_grade_code || ''
+        });
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSave = async () => {
     // TODO: Call API to update profile
@@ -19,6 +71,21 @@ export default function ProfileTab({ user, onUpdate }) {
     setIsEditing(false);
     if (onUpdate) onUpdate(formData);
   };
+
+  if (loading) {
+    return (
+      <div style={{
+        background: 'var(--card-bg)',
+        borderRadius: '20px',
+        padding: '40px',
+        border: '1px solid rgba(255, 255, 255, 0.1)',
+        textAlign: 'center'
+      }}>
+        <div style={{ fontSize: '48px', marginBottom: '20px' }}>⏳</div>
+        <div style={{ color: 'var(--text-secondary)' }}>جاري تحميل البيانات...</div>
+      </div>
+    );
+  }
 
   return (
     <div style={{
@@ -309,6 +376,56 @@ export default function ProfileTab({ user, onUpdate }) {
               {formData.city || 'غير محدد'}
             </div>
           )}
+        </div>
+
+        {/* Gender */}
+        <div>
+          <label style={{
+            display: 'block',
+            color: 'var(--text-secondary)',
+            fontSize: '14px',
+            marginBottom: '8px',
+            fontFamily: 'Cairo, Arial, sans-serif',
+            direction: 'rtl'
+          }}>
+            الجنس
+          </label>
+          <div style={{
+            padding: '12px',
+            background: 'rgba(255, 255, 255, 0.05)',
+            borderRadius: '10px',
+            color: 'var(--text-primary)',
+            fontSize: '16px',
+            fontFamily: 'Cairo, Arial, sans-serif',
+            direction: 'rtl'
+          }}>
+            {formData.gender === 'male' ? 'ذكر' : formData.gender === 'female' ? 'أنثى' : 'غير محدد'}
+          </div>
+        </div>
+
+        {/* School Name */}
+        <div>
+          <label style={{
+            display: 'block',
+            color: 'var(--text-secondary)',
+            fontSize: '14px',
+            marginBottom: '8px',
+            fontFamily: 'Cairo, Arial, sans-serif',
+            direction: 'rtl'
+          }}>
+            المدرسة/الجامعة
+          </label>
+          <div style={{
+            padding: '12px',
+            background: 'rgba(255, 255, 255, 0.05)',
+            borderRadius: '10px',
+            color: 'var(--text-primary)',
+            fontSize: '16px',
+            fontFamily: 'Cairo, Arial, sans-serif',
+            direction: 'rtl'
+          }}>
+            {formData.school_name || 'غير محدد'}
+          </div>
         </div>
       </div>
     </div>
