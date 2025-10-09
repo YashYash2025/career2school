@@ -20,6 +20,9 @@ export default function Home() {
     if (selectors.isLoggedIn(state)) {
       setIsLoggedIn(true)
       setUserInfo(selectors.getUserData(state))
+    } else {
+      // Don't automatically logout - just update UI state
+      setIsLoggedIn(false)
     }
   }, [state])
 
@@ -54,7 +57,7 @@ export default function Home() {
             <Link href="/about" className="nav-link">{t('nav.about')}</Link>
             {isLoggedIn ? (
               <div className="user-menu-container">
-                <button 
+                <button
                   className="user-menu-button"
                   onClick={() => setShowUserMenu(!showUserMenu)}
                 >
@@ -97,13 +100,13 @@ export default function Home() {
               {t('hero.subtitle')}
             </p>
             <div className="hero-buttons">
-              <button 
+              <button
                 className="primary-btn"
                 onClick={() => router.push('/assessments')}
               >
                 {t('hero.start_assessment')}
               </button>
-              <button 
+              <button
                 className="secondary-btn"
                 onClick={() => router.push('/about')}
               >
@@ -301,13 +304,13 @@ export default function Home() {
             {t('cta.description')}
           </p>
           <div className="cta-buttons">
-            <button 
+            <button
               className="cta-primary-btn"
               onClick={() => router.push('/signup')}
             >
               {t('cta.start_assessment')}
             </button>
-            <button 
+            <button
               className="cta-secondary-btn"
               onClick={() => router.push('/login')}
             >
