@@ -76,9 +76,6 @@ export default function Home() {
                     <Link href="/dashboard" className="user-menu-item">
                       {t('nav.dashboard')}
                     </Link>
-                    <Link href="/profile" className="user-menu-item">
-                      {t('nav.profile')}
-                    </Link>
                     <button onClick={handleLogout} className="user-menu-item logout-btn">
                       {t('nav.logout')}
                     </button>
