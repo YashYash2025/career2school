@@ -64,7 +64,6 @@ export default function Careers() {
             <Link href="/" className="nav-link">الرئيسية</Link>
             <Link href="/assessments" className="nav-link">التقييمات</Link>
             <Link href="/careers" className="nav-link">المهن</Link>
-            <Link href="/education" className="nav-link">التعليم</Link>
             <Link href="/about" className="nav-link">عن المنصة</Link>
             <Link href="/login" className="nav-link">تسجيل الدخول</Link>
             <Link href="/signup">

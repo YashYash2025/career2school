@@ -51,7 +51,6 @@ export default function Home() {
             <Link href="/" className="nav-link">{t('nav.home')}</Link>
             <Link href="/assessments" className="nav-link" aria-label={t('nav.assessments_aria')}>{t('nav.assessments')}</Link>
             <Link href="/careers" className="nav-link">{t('nav.careers')}</Link>
-            <Link href="/education" className="nav-link">{t('nav.education')}</Link>
             <Link href="/about" className="nav-link">{t('nav.about')}</Link>
             {isLoggedIn ? (
               <div className="user-menu-container">
