@@ -180,16 +180,30 @@ export default function StatsTab({ user, assessments }) {
                     {assessment.primary_type?.icon || '🎯'}
                   </div>
                   <div>
-                    <div style={{
-                      color: 'var(--text-primary)',
-                      fontSize: '18px',
-                      fontWeight: 'bold',
-                      marginBottom: '5px',
-                      fontFamily: 'Cairo, Arial, sans-serif',
-                      direction: 'rtl'
-                    }}>
-                      {assessment.holland_code}
-                    </div>
+                    <a 
+                      href={`/assessments/riasec/results/${assessment.id}`}
+                      style={{
+                        color: 'var(--text-primary)',
+                        fontSize: '18px',
+                        fontWeight: 'bold',
+                        marginBottom: '5px',
+                        fontFamily: 'Cairo, Arial, sans-serif',
+                        direction: 'rtl',
+                        textDecoration: 'none',
+                        cursor: 'pointer',
+                        transition: 'all 0.3s ease'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.target.style.color = '#3b82f6';
+                        e.target.style.textDecoration = 'underline';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.target.style.color = 'var(--text-primary)';
+                        e.target.style.textDecoration = 'none';
+                      }}
+                    >
+                      {assessment.holland_code} 🔗
+                    </a>
                     <div style={{
                       color: 'var(--text-secondary)',
                       fontSize: '14px',

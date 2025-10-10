@@ -759,7 +759,6 @@ const RIASECInternationalResults = ({
           }}>
             {[
               { id: 'overview', name: '📊 نظرة عامة', icon: '📊' },
-              { id: 'charts', name: '📈 رسوم بيانية', icon: '📈' },
               { id: 'careers', name: '💼 مهن مناسبة', icon: '💼' },
               { id: 'analysis', name: '🔍 تحليل متقدم', icon: '🔍' },
               { id: 'sharing', name: '🚀 مشاركة', icon: '🚀' }
@@ -966,9 +965,12 @@ const RIASECInternationalResults = ({
               color: '#3b82f6',
               marginBottom: '10px'
             }}>
-              {typeof algorithmResults.indices?.profile_elevation === 'object' ? 
-                algorithmResults.indices.profile_elevation?.score || 'N/A' : 
-                algorithmResults.indices?.profile_elevation || 'N/A'}
+              {(() => {
+                // حساب قوة الاهتمامات من متوسط النسب المئوية
+                const percentages = Object.values(raw_scores).map(s => s.percentage || 0);
+                const avg = percentages.reduce((a, b) => a + b, 0) / percentages.length;
+                return Math.round(avg) + '%';
+              })()}
             </div>
             <div style={{
               color: '#a8a8b8',
@@ -1003,9 +1005,16 @@ const RIASECInternationalResults = ({
               color: '#8b5cf6',
               marginBottom: '10px'
             }}>
-              {typeof algorithmResults.indices?.consistency === 'object' ? 
-                algorithmResults.indices.consistency?.score || 'N/A' : 
-                algorithmResults.indices?.consistency || 'N/A'}
+              {(() => {
+                // حساب التوافق من الفرق بين أعلى وأقل نسبة
+                const percentages = Object.values(raw_scores).map(s => s.percentage || 0);
+                const max = Math.max(...percentages);
+                const min = Math.min(...percentages);
+                const range = max - min;
+                // كلما كان الفرق أكبر، كان التوافق أفضل (اختيارات واضحة)
+                const consistency = Math.min(100, Math.round((range / max) * 100));
+                return consistency + '%';
+              })()}
             </div>
             <div style={{
               color: '#a8a8b8',
@@ -1040,9 +1049,11 @@ const RIASECInternationalResults = ({
               color: '#10b981',
               marginBottom: '10px'
             }}>
-              {typeof algorithmResults.indices?.congruence === 'object' ? 
-                algorithmResults.indices.congruence?.score || 'N/A' : 
-                algorithmResults.indices?.congruence || 'N/A'}
+              {(() => {
+                // حساب الملاءمة من نسبة النمط الأساسي
+                const primaryPercentage = ranking[0]?.percentage || 0;
+                return Math.round(primaryPercentage) + '%';
+              })()}
             </div>
             <div style={{
               color: '#a8a8b8',
@@ -1992,11 +2003,15 @@ const RIASECInternationalResults = ({
   };
 
   // Enhanced career matching section
+  // Recommendations are loaded via the useEffect above that calls the API
+
   const renderEnhancedCareerMatching = () => {
     if (!algorithmResults) return null;
     
     const primaryType = algorithmResults.ranking[0];
-    const careerMatches = getCareerMatches(primaryType.type);
+    const careerMatches = (Array.isArray(recommendations) && recommendations.length > 0) 
+      ? recommendations 
+      : getCareerMatches(primaryType.type);
     
     return (
       <div style={{
@@ -2060,18 +2075,47 @@ const RIASECInternationalResults = ({
           </div>
         </div>
         
+        {/* Loading State */}
+        {loadingRecommendations && (
+          <div style={{ textAlign: 'center', padding: '40px', color: '#ffffff' }}>
+            <div style={{ fontSize: '48px', marginBottom: '20px' }}>⏳</div>
+            <div>جاري تحميل التوصيات المهنية...</div>
+          </div>
+        )}
+
         {/* Career Cards with Enhanced Info */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))',
-          gap: '25px'
-        }}>
-          {careerMatches.slice(0, 4).map((career, index) => {
-            const matchLevel = career.matchLevel;
+        {!loadingRecommendations && careerMatches && careerMatches.length > 0 && (
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))',
+            gap: '25px'
+          }}>
+            {careerMatches.map((career, index) => {
+              // Handle database format
+              const title = career.career_title_ar || career.title;
+              const match = career.match_percentage || career.match;
+              const description = career.description_ar || career.description;
+              const educationLevel = career.education_level_ar || career.educationLevel;
+              const salaryMin = career.salary_min_egp || 0;
+              const salaryMax = career.salary_max_egp || 0;
+              const currency = career.salary_currency || 'EGP';
+              const skills = career.skills_ar || career.skills || [];
+              const industries = career.industries_ar || career.industries || [];
+              const linkedinJobs = career.linkedin_jobs_count || career.linkedinJobs || 0;
+              
+              // تنسيق الراتب
+              const salaryRange = salaryMin && salaryMax ? 
+                `${salaryMin.toLocaleString()} - ${salaryMax.toLocaleString()} ${currency}/شهر` :
+                'غير محدد';
+              
+              const matchLevel = match >= 90 ? { color: '#10b981', icon: '🏆', badge: 'ممتاز' } :
+                                match >= 80 ? { color: '#3b82f6', icon: '⭐', badge: 'جيد جداً' } :
+                                match >= 70 ? { color: '#f59e0b', icon: '👍', badge: 'جيد' } :
+                                { color: '#6b7280', icon: '✓', badge: 'مناسب' };
             
             return (
               <div
-                key={career.title}
+                key={career.id || career.title || index}
                 style={{
                   background: index === 0 ? 
                     'linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(5, 150, 105, 0.15))' :
@@ -2110,7 +2154,7 @@ const RIASECInternationalResults = ({
                     direction: 'rtl',
                     fontFamily: 'Cairo, Arial, sans-serif'
                   }}>
-                    {career.title}
+                    {title}
                   </h3>
                   
                   <div style={{
@@ -2119,7 +2163,7 @@ const RIASECInternationalResults = ({
                     color: matchLevel.color,
                     marginBottom: '10px'
                   }}>
-                    {career.match}% تطابق
+                    {match}% تطابق
                   </div>
                   
                   <p style={{
@@ -2129,7 +2173,7 @@ const RIASECInternationalResults = ({
                     marginBottom: '15px',
                     direction: 'rtl'
                   }}>
-                    {career.description}
+                    {description}
                   </p>
                 </div>
                 
@@ -2141,7 +2185,7 @@ const RIASECInternationalResults = ({
                     borderRadius: '10px'
                   }}>
                     <div style={{ color: '#3b82f6', fontWeight: 'bold', fontSize: '12px', marginBottom: '5px' }}>
-                      {career.educationLevel}
+                      {educationLevel}
                     </div>
                     <div style={{ color: colors.textSecondary, fontSize: '11px' }}>
                       المستوى التعليمي المطلوب
@@ -2154,10 +2198,10 @@ const RIASECInternationalResults = ({
                     borderRadius: '10px'
                   }}>
                     <div style={{ color: '#10b981', fontWeight: 'bold', fontSize: '12px', marginBottom: '5px' }}>
-                      💰 {career.salaryRanges?.[selectedExperienceLevel] || 'غير محدد'}
+                      💰 {salaryRange}
                     </div>
                     <div style={{ color: colors.textSecondary, fontSize: '11px' }}>
-                      {getExperienceLabel(selectedExperienceLevel)}
+                      نطاق الراتب المتوقع
                     </div>
                   </div>
                   
@@ -2167,7 +2211,7 @@ const RIASECInternationalResults = ({
                     borderRadius: '10px'
                   }}>
                     <div style={{ color: '#f59e0b', fontWeight: 'bold', fontSize: '12px', marginBottom: '5px' }}>
-                      👥 {career.linkedinJobs} وظيفة متاحة
+                      👥 {linkedinJobs} وظيفة متاحة
                     </div>
                     <div style={{ color: colors.textSecondary, fontSize: '11px' }}>
                       على LinkedIn حالياً
@@ -2177,50 +2221,55 @@ const RIASECInternationalResults = ({
                 
                 {/* Skills and Industries */}
                 <div style={{ marginTop: '15px' }}>
-                  <div style={{ marginBottom: '10px' }}>
-                    <div style={{ color: colors.text, fontSize: '12px', fontWeight: 'bold', marginBottom: '5px' }}>
-                      🛠️ المهارات المطلوبة:
+                  {skills && skills.length > 0 && (
+                    <div style={{ marginBottom: '10px' }}>
+                      <div style={{ color: colors.text, fontSize: '12px', fontWeight: 'bold', marginBottom: '5px' }}>
+                        🛠️ المهارات المطلوبة:
+                      </div>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
+                        {skills.slice(0, 3).map((skill, idx) => (
+                          <span key={idx} style={{
+                            background: 'rgba(59, 130, 246, 0.2)',
+                            color: '#60a5fa',
+                            padding: '3px 8px',
+                            borderRadius: '8px',
+                            fontSize: '10px',
+                            fontWeight: '500'
+                          }}>
+                            {skill}
+                          </span>
+                        ))}
+                      </div>
                     </div>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
-                      {career.skills?.slice(0, 3).map(skill => (
-                        <span key={skill} style={{
-                          background: 'rgba(59, 130, 246, 0.2)',
-                          color: '#60a5fa',
-                          padding: '3px 8px',
-                          borderRadius: '8px',
-                          fontSize: '10px',
-                          fontWeight: '500'
-                        }}>
-                          {skill}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
+                  )}
                   
-                  <div>
-                    <div style={{ color: colors.text, fontSize: '12px', fontWeight: 'bold', marginBottom: '5px' }}>
-                      🏢 القطاعات:
+                  {industries && industries.length > 0 && (
+                    <div>
+                      <div style={{ color: colors.text, fontSize: '12px', fontWeight: 'bold', marginBottom: '5px' }}>
+                        🏢 القطاعات:
+                      </div>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
+                        {industries.slice(0, 3).map((industry, idx) => (
+                          <span key={idx} style={{
+                            background: 'rgba(16, 185, 129, 0.2)',
+                            color: '#34d399',
+                            padding: '3px 8px',
+                            borderRadius: '8px',
+                            fontSize: '10px',
+                            fontWeight: '500'
+                          }}>
+                            {industry}
+                          </span>
+                        ))}
+                      </div>
                     </div>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
-                      {career.industries?.slice(0, 3).map(industry => (
-                        <span key={industry} style={{
-                          background: 'rgba(16, 185, 129, 0.2)',
-                          color: '#34d399',
-                          padding: '3px 8px',
-                          borderRadius: '8px',
-                          fontSize: '10px',
-                          fontWeight: '500'
-                        }}>
-                          {industry}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
+                  )}
                 </div>
               </div>
             );
           })}
-        </div>
+          </div>
+        )}
         
         {/* Match Level Legend */}
         <div style={{
@@ -2405,6 +2454,45 @@ const RIASECInternationalResults = ({
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+
+          {/* Radar Chart Section */}
+          <div style={{
+            background: isDarkMode ? 
+              'rgba(255, 255, 255, 0.05)' :
+              'rgba(255, 255, 255, 0.9)',
+            backdropFilter: 'blur(20px)',
+            borderRadius: '30px',
+            padding: '40px',
+            border: '2px solid rgba(102, 126, 234, 0.3)',
+            marginBottom: '40px',
+            boxShadow: '0 15px 35px rgba(102, 126, 234, 0.15)'
+          }}>
+            <h3 style={{
+              fontSize: '28px',
+              fontWeight: 'bold',
+              color: isDarkMode ? '#ffffff' : '#1a202c',
+              marginBottom: '30px',
+              textAlign: 'center',
+              direction: 'rtl',
+              fontFamily: 'Cairo, Arial, sans-serif'
+            }}>
+              📊 الرسم البياني الراداري - نتائجك الكاملة
+            </h3>
+            
+            <div style={{
+              height: '500px',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center'
+            }}>
+              {prepareChartData(raw_scores) && (
+                <Radar 
+                  data={prepareChartData(raw_scores)} 
+                  options={chartOptions}
+                />
+              )}
             </div>
           </div>
         </div>

@@ -25,10 +25,20 @@ function DashboardContent() {
     loadUserData();
   }, []);
 
+  // Load assessments when user is set
+  useEffect(() => {
+    if (user && user.id) {
+      console.log('👤 User is set, loading assessments for:', user.id);
+      loadAssessments(null);
+    }
+  }, [user]);
+
   const loadUserData = async () => {
     try {
       // Check Supabase session
       const { data: { session } } = await supabase.auth.getSession();
+      
+      let currentUser = null;
       
       if (session && session.user) {
         const userData = {
@@ -38,11 +48,14 @@ function DashboardContent() {
           profile: session.user.user_metadata
         };
         setUser(userData);
+        currentUser = userData;
       } else {
         // Check localStorage
         const storedUserData = localStorage.getItem('userData');
         if (storedUserData) {
-          setUser(JSON.parse(storedUserData));
+          const userData = JSON.parse(storedUserData);
+          setUser(userData);
+          currentUser = userData;
         } else {
           // Redirect to login
           router.push('/login');
@@ -50,11 +63,99 @@ function DashboardContent() {
         }
       }
       
+      // Assessments will be loaded by useEffect when user state updates
+      
       setLoading(false);
     } catch (error) {
       console.error('Error loading user data:', error);
       setLoading(false);
     }
+  };
+
+  const loadAssessments = async (session) => {
+    try {
+      console.log('📊 Loading assessments for user:', user?.id);
+      
+      // Get user ID from session or user state
+      const userId = session?.user?.id || user?.id;
+      
+      if (!userId) {
+        console.log('⚠️ No user ID available');
+        return;
+      }
+      
+      // Fetch directly from Supabase
+      const { data: results, error } = await supabase
+        .from('assessment_results')
+        .select('*')
+        .eq('user_id', userId)
+        .not('detailed_scores->assessment_type', 'is', null)
+        .eq('detailed_scores->>assessment_type', 'RIASEC')
+        .order('created_at', { ascending: false });
+      
+      if (error) {
+        console.error('❌ Error fetching assessments:', error);
+        return;
+      }
+      
+      console.log('📦 Raw results:', results);
+      
+      // Transform data
+      const transformedAssessments = results.map(assessment => {
+        const detailed_scores = assessment.detailed_scores || {};
+        const holland_code = detailed_scores.holland_code || '';
+        const ranking = detailed_scores.ranking || [];
+        const primary_type = ranking[0] || { type: holland_code[0], percentage: 0 };
+
+        return {
+          id: assessment.id,
+          holland_code,
+          raw_scores: detailed_scores.raw_scores || {},
+          ranking,
+          completed_date: assessment.created_at,
+          confidence_score: detailed_scores.confidence_score || 0,
+          primary_type: {
+            type: primary_type.type,
+            name: getTypeName(primary_type.type),
+            percentage: primary_type.percentage,
+            icon: getTypeIcon(primary_type.type)
+          },
+          profile_type: assessment.profile_type,
+          profile_description: assessment.profile_description
+        };
+      });
+      
+      setAssessments(transformedAssessments);
+      console.log('✅ Loaded assessments:', transformedAssessments.length);
+      
+    } catch (error) {
+      console.error('❌ Error loading assessments:', error);
+    }
+  };
+
+  // Helper functions
+  const getTypeName = (type) => {
+    const names = {
+      R: 'الواقعي',
+      I: 'الاستقصائي',
+      A: 'الفني',
+      S: 'الاجتماعي',
+      E: 'المغامر',
+      C: 'التقليدي'
+    };
+    return names[type] || type;
+  };
+
+  const getTypeIcon = (type) => {
+    const icons = {
+      R: '🔧',
+      I: '🔬',
+      A: '🎨',
+      S: '🤝',
+      E: '💼',
+      C: '📊'
+    };
+    return icons[type] || '🎯';
   };
 
   if (loading || !user) {
