@@ -1,12 +1,12 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Big5International from '../../../lib/algorithms/Big5International';
 import UnifiedNavigation from '../../../components/UnifiedNavigation';
 import AnswerCard from '../../../components/assessments/AnswerCard';
 
-export default function Big5Assessment() {
+function Big5AssessmentContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const versionParam = searchParams.get('version') || 'college';
@@ -923,4 +923,26 @@ export default function Big5Assessment() {
   }
 
   return null;
+}
+
+export default function Big5Assessment() {
+  return (
+    <Suspense fallback={
+      <div style={{
+        minHeight: '100vh',
+        background: 'linear-gradient(135deg, #0f0f1e 0%, #1a1a2e 50%, #16213e 100%)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        color: 'white'
+      }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: '48px', marginBottom: '20px' }}>⏳</div>
+          <div style={{ fontSize: '24px' }}>جاري التحميل...</div>
+        </div>
+      </div>
+    }>
+      <Big5AssessmentContent />
+    </Suspense>
+  );
 }
