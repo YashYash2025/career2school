@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import UnifiedNavigation from '@/app/components/UnifiedNavigation'
 
 export default function RIASECAssessments() {
   const router = useRouter()
@@ -10,7 +11,7 @@ export default function RIASECAssessments() {
   const versions = [
     { 
       icon: '🎓', 
-      title: 'RIASEC للمدارس (60 سؤال)', 
+      title: 'للمدارس (60 سؤال)', 
       desc: 'مخصص لطلاب المرحلة الإعدادية والثانوية - أسئلة مبسطة ومناسبة', 
       time: '15-20 دقيقة', 
       path: '/assessments/riasec/enhanced?version=school',
@@ -22,7 +23,7 @@ export default function RIASECAssessments() {
     },
     { 
       icon: '🎯', 
-      title: 'RIASEC للجامعات والخريجين (60 سؤال)', 
+      title: 'للجامعات والخريجين (60 سؤال)', 
       desc: 'مخصص لطلاب الجامعة والخريجين الجدد - أسئلة متخصصة ومهنية', 
       time: '15-20 دقيقة', 
       path: '/assessments/riasec/enhanced?version=college',
@@ -49,49 +50,11 @@ export default function RIASECAssessments() {
       }}></div>
 
       {/* Navigation */}
-      <div style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        height: '70px',
-        background: 'rgba(15, 15, 30, 0.98)',
-        backdropFilter: 'blur(20px)',
-        borderBottom: '2px solid rgba(102, 126, 234, 0.3)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: '0 40px',
-        zIndex: 1000,
-        boxShadow: '0 10px 30px rgba(0, 0, 0, 0.5)'
-      }}>
-        <Link href="/assessments" style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: '12px',
-          padding: '12px 24px',
-          background: 'linear-gradient(135deg, #667eea, #764ba2)',
-          borderRadius: '50px',
-          color: 'white',
-          textDecoration: 'none',
-          fontWeight: 'bold',
-          transition: 'all 0.3s ease',
-          boxShadow: '0 5px 15px rgba(118, 75, 162, 0.4)'
-        }}>
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M15 19L8 12L15 5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-          العودة للتقييمات
-        </Link>
-        <div style={{ color: '#ffffff', fontSize: '24px', fontWeight: 'bold' }}>
-          تقييم RIASEC للميول المهنية
-        </div>
-        <div></div>
-      </div>
+      <UnifiedNavigation showBackButton={true} backUrl="/assessments" />
 
       {/* Main Content */}
       <main style={{ 
-        paddingTop: '120px', 
+        paddingTop: '100px', 
         paddingLeft: '160px',
         paddingRight: '160px',
         paddingBottom: '60px',
@@ -132,9 +95,10 @@ export default function RIASECAssessments() {
               margin: 0,
               background: 'linear-gradient(135deg, #667eea, #764ba2)',
               WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent'
+              WebkitTextFillColor: 'transparent',
+              fontFamily: 'Cairo, Arial, sans-serif'
             }}>
-              تقييم RIASEC للميول المهنية
+              بوصلة المهن™
             </h1>
           </div>
           <p style={{
@@ -142,9 +106,10 @@ export default function RIASECAssessments() {
             color: '#a8a8b8',
             maxWidth: '800px',
             margin: '0 auto',
-            lineHeight: '1.6'
+            lineHeight: '1.6',
+            fontFamily: 'Cairo, Arial, sans-serif'
           }}>
-            التقييم العلمي الأكثر دقة في العالم لاكتشاف ميولك المهنية الحقيقية
+            اكتشف مسارك المهني بدقة علمية
           </p>
         </div>
 
@@ -328,9 +293,10 @@ export default function RIASECAssessments() {
               alignItems: 'center',
               justifyContent: 'center',
               gap: '10px',
-              direction: 'rtl'
+              direction: 'rtl',
+              fontFamily: 'Cairo, Arial, sans-serif'
             }}>
-              النسخ العالمية المعتمدة
+              اختر النسخة المناسبة لك
               <span style={{
                 background: 'linear-gradient(135deg, #667eea, #764ba2)',
                 padding: '8px 12px',
@@ -348,128 +314,165 @@ export default function RIASECAssessments() {
           </div>
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', // Increased from 320px to make cards bigger
-            gap: '25px',
-            maxWidth: '750px',  // Reduced from 900px for more constrained grid
-            margin: '0 auto'    // Center the grid
+            gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+            gap: '30px',
+            maxWidth: '1100px',
+            margin: '0 auto'
           }}>
-            {versions.map((version, index) => (
-              <div key={index} style={{
-                background: version.recommended ? 'rgba(102, 126, 234, 0.1)' : 'rgba(255, 255, 255, 0.05)',
-                borderRadius: '18px',
-                padding: '25px', // Increased from 20px
-                border: version.recommended ? '2px solid rgba(102, 126, 234, 0.3)' : '1px solid rgba(255, 255, 255, 0.1)',
-                transition: 'all 0.3s ease',
-                cursor: 'pointer',
-                position: 'relative',
-                direction: 'rtl',
-                textAlign: 'right'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-5px)'
-                e.currentTarget.style.boxShadow = '0 15px 30px rgba(102, 126, 234, 0.2)'
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)'
-                e.currentTarget.style.boxShadow = 'none'
-              }}>
-                
-                {/* Badge */}
-                {version.badge && (
+            {versions.map((version, index) => {
+              const versionColor = version.recommended ? '#667eea' : '#10b981';
+              const versionGradient = version.recommended 
+                ? 'linear-gradient(135deg, #667eea, #764ba2)' 
+                : 'linear-gradient(135deg, #10b981, #059669)';
+              
+              return (
+                <div
+                  key={index}
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.05)',
+                    backdropFilter: 'blur(20px)',
+                    borderRadius: '25px',
+                    padding: '35px',
+                    border: `2px solid ${versionColor}40`,
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease',
+                    position: 'relative',
+                    overflow: 'hidden'
+                  }}
+                  onClick={() => router.push(version.path)}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-10px)';
+                    e.currentTarget.style.boxShadow = `0 20px 40px ${versionColor}40`;
+                    e.currentTarget.style.borderColor = versionColor;
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = 'none';
+                    e.currentTarget.style.borderColor = `${versionColor}40`;
+                  }}
+                >
+                  {/* Icon */}
                   <div style={{
-                    position: 'absolute',
-                    top: '-8px',
-                    left: '15px',
-                    background: version.recommended ? 'linear-gradient(135deg, #667eea, #764ba2)' : 'linear-gradient(135deg, #f59e0b, #d97706)',
-                    color: 'white',
-                    padding: '4px 12px',
-                    borderRadius: '12px',
-                    fontSize: '10px',
-                    fontWeight: 'bold',
-                    boxShadow: '0 4px 15px rgba(0, 0, 0, 0.2)'
-                  }}>
-                    {version.badge} {version.recommended && ' ⭐'}
-                  </div>
-                )}
-                
-                <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '18px', direction: 'rtl' }}> {/* Increased gap and margin */}
-                  <div style={{ flex: 1 }}>
-                    <h3 style={{
-                      fontSize: '18px',  // Increased from 16px
-                      marginBottom: '8px', 
-                      color: 'white', 
-                      textAlign: 'right',
-                      fontWeight: 'bold'
-                    }}>
-                      {version.title}
-                    </h3>
-                    <p style={{
-                      color: '#a8a8b8', 
-                      fontSize: '12px',  // Increased from 11px
-                      textAlign: 'right',
-                      lineHeight: '1.4'
-                    }}>
-                      {version.desc}
-                    </p>
-                  </div>
-                  <div style={{
-                    width: '55px',     // Increased from 50px
-                    height: '55px',    // Increased from 50px
-                    background: version.recommended ? 'linear-gradient(135deg, #667eea, #764ba2)' : 'linear-gradient(135deg, #10b981, #059669)',
-                    borderRadius: '14px', // Increased from 12px
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '26px',  // Increased from 24px
-                    flexShrink: 0
+                    fontSize: '64px',
+                    marginBottom: '20px',
+                    textAlign: 'center'
                   }}>
                     {version.icon}
                   </div>
-                </div>
 
-                {/* Info Grid */}
-                <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: '1fr 1fr',
-                  gap: '12px',      // Increased from 10px
-                  marginBottom: '18px' // Increased from 15px
-                }}>
-                  <div style={{ textAlign: 'center', padding: '10px', background: 'rgba(255, 255, 255, 0.05)', borderRadius: '10px' }}> {/* Increased padding and border radius */}
-                    <div style={{ color: '#10b981', fontSize: '11px', fontWeight: 'bold' }}>عدد الأسئلة</div>
-                    <div style={{ color: 'white', fontSize: '16px', fontWeight: 'bold' }}>{version.questions}</div> {/* Increased from 14px */}
-                  </div>
-                  <div style={{ textAlign: 'center', padding: '10px', background: 'rgba(255, 255, 255, 0.05)', borderRadius: '10px' }}> {/* Increased padding and border radius */}
-                    <div style={{ color: '#10b981', fontSize: '11px', fontWeight: 'bold' }}>الوقت المطلوب</div>
-                    <div style={{ color: 'white', fontSize: '16px', fontWeight: 'bold' }}>{version.time}</div> {/* Increased from 14px */}
-                  </div>
-                </div>
-
-                <button 
-                  onClick={() => router.push(version.path)}
-                  style={{
-                    width: '100%',
-                    padding: '14px',  // Increased from 12px
-                    background: version.recommended ? 'linear-gradient(135deg, #667eea, #764ba2)' : 'linear-gradient(135deg, #10b981, #059669)',
-                    border: 'none',
-                    borderRadius: '12px', // Increased from 10px
-                    color: 'white',
-                    fontSize: '15px',  // Increased from 14px
+                  {/* Title */}
+                  <h2 style={{
+                    fontSize: '28px',
                     fontWeight: 'bold',
-                    cursor: 'pointer',
-                    transition: 'all 0.3s ease'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.target.style.transform = 'translateY(-1px)'
-                    e.target.style.boxShadow = '0 4px 15px rgba(102, 126, 234, 0.3)'
-                  }}
-                  onMouseLeave={(e) => {
-                    e.target.style.transform = 'translateY(0)'
-                    e.target.style.boxShadow = 'none'
+                    color: versionColor,
+                    marginBottom: '15px',
+                    textAlign: 'center',
+                    fontFamily: 'Cairo, Arial, sans-serif',
+                    direction: 'rtl'
                   }}>
-                  ابدأ التقييم الآن 🚀
-                </button>
-              </div>
-            ))}
+                    {version.title}
+                  </h2>
+
+                  {/* Description */}
+                  <p style={{
+                    fontSize: '16px',
+                    color: '#a8a8b8',
+                    marginBottom: '25px',
+                    textAlign: 'center',
+                    lineHeight: '1.6',
+                    fontFamily: 'Cairo, Arial, sans-serif',
+                    direction: 'rtl'
+                  }}>
+                    {version.desc}
+                  </p>
+
+                  {/* Info Grid */}
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: '1fr 1fr',
+                    gap: '15px',
+                    marginBottom: '25px'
+                  }}>
+                    <div style={{
+                      textAlign: 'center',
+                      padding: '15px',
+                      background: 'rgba(255, 255, 255, 0.05)',
+                      borderRadius: '12px',
+                      border: `1px solid ${versionColor}20`
+                    }}>
+                      <div style={{
+                        color: versionColor,
+                        fontSize: '12px',
+                        fontWeight: 'bold',
+                        marginBottom: '5px',
+                        fontFamily: 'Cairo, Arial, sans-serif'
+                      }}>
+                        عدد الأسئلة
+                      </div>
+                      <div style={{
+                        color: 'white',
+                        fontSize: '20px',
+                        fontWeight: 'bold'
+                      }}>
+                        {version.questions}
+                      </div>
+                    </div>
+                    <div style={{
+                      textAlign: 'center',
+                      padding: '15px',
+                      background: 'rgba(255, 255, 255, 0.05)',
+                      borderRadius: '12px',
+                      border: `1px solid ${versionColor}20`
+                    }}>
+                      <div style={{
+                        color: versionColor,
+                        fontSize: '12px',
+                        fontWeight: 'bold',
+                        marginBottom: '5px',
+                        fontFamily: 'Cairo, Arial, sans-serif'
+                      }}>
+                        الوقت المطلوب
+                      </div>
+                      <div style={{
+                        color: 'white',
+                        fontSize: '20px',
+                        fontWeight: 'bold'
+                      }}>
+                        {version.time}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Button */}
+                  <button
+                    style={{
+                      width: '100%',
+                      padding: '15px',
+                      background: versionGradient,
+                      border: 'none',
+                      borderRadius: '15px',
+                      color: 'white',
+                      fontSize: '18px',
+                      fontWeight: 'bold',
+                      cursor: 'pointer',
+                      transition: 'all 0.3s ease',
+                      fontFamily: 'Cairo, Arial, sans-serif',
+                      direction: 'rtl'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = 'scale(1.05)';
+                      e.currentTarget.style.boxShadow = `0 10px 25px ${versionColor}60`;
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = 'scale(1)';
+                      e.currentTarget.style.boxShadow = 'none';
+                    }}
+                  >
+                    ابدأ التقييم ←
+                  </button>
+                </div>
+              );
+            })}
           </div>
         </div>
 

@@ -1,13 +1,13 @@
 'use client'
 
 import Link from 'next/link'
-import SharedNavigation from '../components/SharedNavigation'
+import UnifiedNavigation from '../components/UnifiedNavigation'
 
 export default function About() {
   return (
     <>
-      {/* Shared Navigation */}
-      <SharedNavigation />
+      {/* Unified Navigation */}
+      <UnifiedNavigation />
       
       {/* Animated Background */}
       <div className="bg-animation"></div>
@@ -18,7 +18,7 @@ export default function About() {
       </div>
 
       {/* Main Content */}
-      <main style={{ paddingTop: '120px', minHeight: '100vh' }}>
+      <main style={{ paddingTop: '100px', minHeight: '100vh' }}>
         <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '40px 50px' }}>
           
           {/* Header */}

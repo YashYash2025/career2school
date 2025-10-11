@@ -48,8 +48,12 @@ const useRIASECInternational = () => {
       const data = await response.json();
       console.log('🎉 نتائج الـ API:', data);
       
-      setResults(data.data);
-      return data.data;
+      // Extract algorithm_results from the nested structure
+      const algorithmResults = data.data?.algorithm_results || data.data;
+      console.log('🎯 Algorithm Results Extracted:', algorithmResults);
+      
+      setResults(algorithmResults);
+      return algorithmResults;
 
     } catch (err) {
       console.error('Error calculating RIASEC results:', err);

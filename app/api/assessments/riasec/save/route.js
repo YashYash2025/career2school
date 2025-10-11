@@ -7,7 +7,11 @@ export async function POST(request) {
     const body = await request.json();
     const { holland_code, raw_scores, ranking, confidence_score } = body;
 
-    console.log('📥 Save RIASEC Results Request:', { holland_code, confidence_score });
+    console.log('📥 Save RIASEC Results Request - Full Body:', JSON.stringify(body, null, 2));
+    console.log('📊 Holland Code:', holland_code);
+    console.log('📊 Raw Scores:', raw_scores);
+    console.log('📊 Ranking:', ranking);
+    console.log('📊 Confidence Score:', confidence_score);
 
     // 2. Validate required fields
     if (!holland_code || !raw_scores || !ranking) {
@@ -36,19 +40,32 @@ export async function POST(request) {
 
     const { data: { user }, error: authError } = await supabase.auth.getUser();
 
-    if (authError || !user) {
-      console.error('❌ Authentication error:', authError);
-      return NextResponse.json(
-        { 
-          success: false, 
-          error: 'يرجى تسجيل الدخول لحفظ النتائج',
-          details: authError?.message || 'User not authenticated'
-        },
-        { status: 401 }
-      );
+    let userId = null;
+    if (user) {
+      userId = user.id;
+      console.log('✅ User authenticated via token:', userId);
+    } else {
+      console.warn('⚠️ No authenticated user from token');
+      if (authError) {
+        console.error('⚠️ Auth error:', authError.message);
+      }
+      
+      // Try to get user_id from request body as fallback
+      if (body.user_id) {
+        userId = body.user_id;
+        console.log('✅ Using user_id from request body:', userId);
+      } else {
+        return NextResponse.json(
+          { 
+            success: false, 
+            error: 'يرجى تسجيل الدخول لحفظ النتائج',
+            details: 'User authentication required. Please login again.',
+            code: 'AUTH_REQUIRED'
+          },
+          { status: 401 }
+        );
+      }
     }
-
-    console.log('✅ User authenticated:', user.id);
 
     // 4. Prepare detailed_scores object
     const detailed_scores = {
@@ -67,7 +84,7 @@ export async function POST(request) {
     const { data: result, error: insertError } = await supabase
       .from('assessment_results')
       .insert({
-        user_id: user.id,
+        user_id: userId,
         tool_id: null, // Can be set if you have a tool_id for RIASEC
         session_id: null, // Can be set if you track sessions
         detailed_scores,

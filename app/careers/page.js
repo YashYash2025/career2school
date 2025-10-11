@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import SharedNavigation from '../components/SharedNavigation'
+import UnifiedNavigation from '../components/UnifiedNavigation'
 
 export default function Careers() {
   const careerPaths = [
@@ -49,8 +49,8 @@ export default function Careers() {
 
   return (
     <>
-      {/* Shared Navigation */}
-      <SharedNavigation />
+      {/* Unified Navigation */}
+      <UnifiedNavigation />
       
       {/* Animated Background */}
       <div className="bg-animation"></div>

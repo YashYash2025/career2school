@@ -1,4 +1,3 @@
-'use client'
 'use client';
 
 import { useState, useEffect } from 'react'
@@ -6,6 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useAppContext, selectors } from './context/AppContext'
 import { useTranslation, LanguageSwitcher } from './lib/translation'
+import UnifiedNavigation from './components/UnifiedNavigation'
 
 export default function Home() {
   const { t, currentLanguage, direction } = useTranslation()
@@ -54,43 +54,7 @@ export default function Home() {
       </div>
 
       {/* Navigation */}
-      <nav>
-        <div className="nav-container">
-          <div className="logo">School2Career</div>
-          <div className="nav-links">
-            <LanguageSwitcher />
-            <Link href="/" className="nav-link">{t('nav.home')}</Link>
-            <Link href="/assessments" className="nav-link" aria-label={t('nav.assessments_aria')}>{t('nav.assessments')}</Link>
-            <Link href="/careers" className="nav-link">{t('nav.careers')}</Link>
-            <Link href="/about" className="nav-link">{t('nav.about')}</Link>
-            {isLoggedIn ? (
-              <div className="user-menu-container">
-                <button
-                  className="user-menu-button"
-                  onClick={() => setShowUserMenu(!showUserMenu)}
-                >
-                  {userInfo.name || t('nav.user')}
-                </button>
-                {showUserMenu && (
-                  <div className="user-menu">
-                    <Link href="/dashboard" className="user-menu-item">
-                      {t('nav.dashboard')}
-                    </Link>
-                    <button onClick={handleLogout} className="user-menu-item logout-btn">
-                      {t('nav.logout')}
-                    </button>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <>
-                <Link href="/login" className="nav-link">{t('nav.login')}</Link>
-                <Link href="/signup" className="nav-link">{t('nav.signup')}</Link>
-              </>
-            )}
-          </div>
-        </div>
-      </nav>
+      <UnifiedNavigation />
 
       {/* Hero Section */}
       <section className="hero" id="home">

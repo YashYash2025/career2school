@@ -4,6 +4,7 @@ import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@supabase/supabase-js';
+import UnifiedNavigation from '../components/UnifiedNavigation';
 import ProfileTab from './components/ProfileTab';
 import StatsTab from './components/StatsTab';
 import AssessmentsList from './components/AssessmentsList';
@@ -74,23 +75,36 @@ function DashboardContent() {
 
   const loadAssessments = async (session) => {
     try {
-      console.log('📊 Loading assessments for user:', user?.id);
+      // Get user ID from multiple sources
+      let userId = session?.user?.id || user?.id;
       
-      // Get user ID from session or user state
-      const userId = session?.user?.id || user?.id;
+      // If still no userId, try to get from Supabase session
+      if (!userId) {
+        const { data: { session: currentSession } } = await supabase.auth.getSession();
+        userId = currentSession?.user?.id;
+      }
+      
+      // If still no userId, try localStorage
+      if (!userId) {
+        const storedUserData = localStorage.getItem('userData');
+        if (storedUserData) {
+          const userData = JSON.parse(storedUserData);
+          userId = userData.id;
+        }
+      }
+      
+      console.log('📊 Loading assessments for user:', userId);
       
       if (!userId) {
         console.log('⚠️ No user ID available');
         return;
       }
       
-      // Fetch directly from Supabase
+      // Fetch directly from Supabase - جلب كل التقييمات (RIASEC و Big5)
       const { data: results, error } = await supabase
         .from('assessment_results')
         .select('*')
         .eq('user_id', userId)
-        .not('detailed_scores->assessment_type', 'is', null)
-        .eq('detailed_scores->>assessment_type', 'RIASEC')
         .order('created_at', { ascending: false });
       
       if (error) {
@@ -100,29 +114,62 @@ function DashboardContent() {
       
       console.log('📦 Raw results:', results);
       
-      // Transform data
+      // Transform data - دعم RIASEC و Big5
       const transformedAssessments = results.map(assessment => {
         const detailed_scores = assessment.detailed_scores || {};
-        const holland_code = detailed_scores.holland_code || '';
-        const ranking = detailed_scores.ranking || [];
-        const primary_type = ranking[0] || { type: holland_code[0], percentage: 0 };
+        
+        // تحديد نوع التقييم
+        const assessmentType = detailed_scores.assessment_type || 
+                              (detailed_scores.holland_code ? 'RIASEC' : 'BIG5');
+        
+        if (assessmentType === 'RIASEC') {
+          // RIASEC Assessment
+          const holland_code = detailed_scores.holland_code || '';
+          const ranking = detailed_scores.ranking || [];
+          const primary_type = ranking[0] || { type: holland_code[0], percentage: 0 };
 
-        return {
-          id: assessment.id,
-          holland_code,
-          raw_scores: detailed_scores.raw_scores || {},
-          ranking,
-          completed_date: assessment.created_at,
-          confidence_score: detailed_scores.confidence_score || 0,
-          primary_type: {
-            type: primary_type.type,
-            name: getTypeName(primary_type.type),
-            percentage: primary_type.percentage,
-            icon: getTypeIcon(primary_type.type)
-          },
-          profile_type: assessment.profile_type,
-          profile_description: assessment.profile_description
-        };
+          return {
+            id: assessment.id,
+            type: 'RIASEC',
+            holland_code,
+            raw_scores: detailed_scores.raw_scores || {},
+            ranking,
+            completed_date: assessment.created_at,
+            confidence_score: detailed_scores.confidence_score || 0,
+            primary_type: {
+              type: primary_type.type,
+              name: getTypeName(primary_type.type),
+              percentage: primary_type.percentage,
+              icon: getTypeIcon(primary_type.type)
+            },
+            profile_type: assessment.profile_type,
+            profile_description: assessment.profile_description
+          };
+        } else {
+          // Big5 Assessment
+          const profile_code = detailed_scores.profile_code || assessment.profile_type || '';
+          const profile_name = detailed_scores.profile_name || { ar: 'الشخصية المتوازنة' };
+          const ranking = detailed_scores.ranking || [];
+          const top_trait = ranking[0] || { trait: 'O', percentage: 0 };
+
+          return {
+            id: assessment.id,
+            type: 'BIG5',
+            profile_code,
+            profile_name: profile_name.ar || profile_name,
+            raw_scores: detailed_scores.raw_scores || {},
+            ranking,
+            completed_date: assessment.created_at,
+            top_trait: {
+              trait: top_trait.trait,
+              name: getBig5TraitName(top_trait.trait),
+              percentage: top_trait.percentage,
+              icon: getBig5TraitIcon(top_trait.trait)
+            },
+            profile_type: assessment.profile_type,
+            profile_description: assessment.profile_description
+          };
+        }
       });
       
       setAssessments(transformedAssessments);
@@ -133,7 +180,7 @@ function DashboardContent() {
     }
   };
 
-  // Helper functions
+  // Helper functions for RIASEC
   const getTypeName = (type) => {
     const names = {
       R: 'الواقعي',
@@ -156,6 +203,29 @@ function DashboardContent() {
       C: '📊'
     };
     return icons[type] || '🎯';
+  };
+
+  // Helper functions for Big5
+  const getBig5TraitName = (trait) => {
+    const names = {
+      O: 'الانفتاح',
+      C: 'يقظة الضمير',
+      E: 'الانبساطية',
+      A: 'المقبولية',
+      N: 'العصابية'
+    };
+    return names[trait] || trait;
+  };
+
+  const getBig5TraitIcon = (trait) => {
+    const icons = {
+      O: '🌟',
+      C: '⚙️',
+      E: '🤝',
+      A: '❤️',
+      N: '🧠'
+    };
+    return icons[trait] || '🎯';
   };
 
   if (loading || !user) {
@@ -192,25 +262,10 @@ function DashboardContent() {
       </div>
 
       {/* Navigation */}
-      <nav>
-        <div className="nav-container">
-          <div className="logo">School2Career</div>
-          <div className="nav-links">
-            <Link href="/" className="nav-link">الرئيسية</Link>
-            <Link href="/assessments" className="nav-link">التقييمات</Link>
-            <Link href="/careers" className="nav-link">المهن</Link>
-            <Link href="/dashboard" className="nav-link">لوحة التحكم</Link>
-            <div className="user-menu-container">
-              <button className="user-menu-button">
-                {user.name}
-              </button>
-            </div>
-          </div>
-        </div>
-      </nav>
+      <UnifiedNavigation />
 
       {/* Main Content */}
-      <main style={{ paddingTop: '120px', minHeight: '100vh' }}>
+      <main style={{ paddingTop: '100px', minHeight: '100vh' }}>
         <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '40px 50px' }}>
           
           {/* Welcome Header */}

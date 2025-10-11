@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useAppContext, selectors } from '../context/AppContext'
-import SharedNavigation from '../components/SharedNavigation'
+import UnifiedNavigation from '../components/UnifiedNavigation'
 
 export default function Assessments() {
   const { state, actions } = useAppContext()
@@ -23,19 +23,25 @@ export default function Assessments() {
   const personalityGroup = [
     {
       icon: '🧠',
-      title: 'Big Five Personality',
-      subtitle: 'اختبار الشخصية الخماسي الكبير',
-      time: '30 دقيقة',
-      path: null,
-      disabled: true
+      title: 'مرآة الشخصية™',
+      brandTitle: 'Personality Mirror™',
+      subtitle: 'افهم نفسك لتختار مستقبلك',
+      description: '3 تقييمات متطورة من مرآة School2Career: للمدارس الإعدادية والثانوية والجامعات',
+      time: null,
+      path: '/assessments/big-five',
+      active: true,
+      badge: 'متاح الآن'
     },
     {
       icon: '🎯',
-      title: 'RIASEC/Holland Code',
-      subtitle: '6 نسخ متطورة من السريع للشامل + نسختنا الذكية School2Career\nخوارزميات متقدمة وتوصيات مستقبلية مخصصة',
-      time: '10-60 دقيقة',
+      title: 'بوصلة المهن™',
+      brandTitle: 'Career Compass™',
+      subtitle: 'اكتشف مسارك المهني بدقة علمية',
+      description: '4 تقييمات متطورة من بوصلة School2Career الذكية: للمدارس والجامعات بنسختين (سريع 60 سؤال - شامل 180 سؤال)',
+      time: null,
       path: '/assessments/riasec',
-      active: true
+      active: true,
+      badge: 'متاح الآن'
     },
     {
       icon: '🌟',
@@ -138,13 +144,13 @@ export default function Assessments() {
 
   if (loading) {
     return (
-      <div style={{ 
-        display: 'flex', 
-        alignItems: 'center', 
-        justifyContent: 'center', 
-        height: '100vh', 
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        height: '100vh',
         background: 'linear-gradient(135deg, #0f0f1e 0%, #1a1a2e 50%, #16213e 100%)',
-        color: 'white' 
+        color: 'white'
       }}>
         جاري التحميل...
       </div>
@@ -164,19 +170,19 @@ export default function Assessments() {
       textAlign: 'right',
       opacity: assessment.disabled ? 0.7 : 1
     }}
-    onMouseEnter={(e) => {
-      if (assessment.path) {
-        e.currentTarget.style.transform = 'translateY(-8px)'
-        e.currentTarget.style.boxShadow = `0 20px 40px rgba(${themeColor}, 0.25)`
-      }
-    }}
-    onMouseLeave={(e) => {
-      if (assessment.path) {
-        e.currentTarget.style.transform = 'translateY(0)'
-        e.currentTarget.style.boxShadow = 'none'
-      }
-    }}>
-      
+      onMouseEnter={(e) => {
+        if (assessment.path) {
+          e.currentTarget.style.transform = 'translateY(-8px)'
+          e.currentTarget.style.boxShadow = `0 20px 40px rgba(${themeColor}, 0.25)`
+        }
+      }}
+      onMouseLeave={(e) => {
+        if (assessment.path) {
+          e.currentTarget.style.transform = 'translateY(0)'
+          e.currentTarget.style.boxShadow = 'none'
+        }
+      }}>
+
       {assessment.active && (
         <div style={{
           position: 'absolute',
@@ -193,80 +199,94 @@ export default function Assessments() {
           متاح الآن ✨
         </div>
       )}
-      
-      <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '20px', direction: 'rtl' }}>
+
+      <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '15px', direction: 'rtl' }}>
         <div style={{ flex: 1 }}>
-          <h3 style={{
-            fontSize: '18px',
-            marginBottom: '8px', 
-            color: 'white', 
-            textAlign: 'right',
-            fontWeight: 'bold'
-          }}>
-            {assessment.title}
-          </h3>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+            <h3 style={{
+              fontSize: '20px',
+              color: 'white',
+              textAlign: 'right',
+              fontWeight: 'bold',
+              margin: 0
+            }}>
+              {assessment.title}
+            </h3>
+            {assessment.badge && (
+              <span style={{
+                background: `linear-gradient(135deg, rgb(${themeColor}), rgba(${themeColor}, 0.8))`,
+                color: 'white',
+                padding: '4px 12px',
+                borderRadius: '12px',
+                fontSize: '11px',
+                fontWeight: 'bold'
+              }}>
+                {assessment.badge}
+              </span>
+            )}
+          </div>
           <p style={{
-            color: '#a8a8b8', 
-            fontSize: assessment.title === 'RIASEC/Holland Code' ? '15px' : '12px', 
+            color: '#a8a8b8',
+            fontSize: '14px',
             textAlign: 'right',
-            lineHeight: '1.5'
+            lineHeight: '1.5',
+            margin: 0
           }}>
             {assessment.subtitle}
           </p>
         </div>
         <div style={{
-          width: '55px',
-          height: '55px',
+          width: '60px',
+          height: '60px',
           background: `linear-gradient(135deg, rgb(${themeColor}), rgba(${themeColor}, 0.8))`,
-          borderRadius: '16px',
+          borderRadius: '18px',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          fontSize: '26px',
-          flexShrink: 0
+          fontSize: '30px',
+          flexShrink: 0,
+          boxShadow: `0 8px 20px rgba(${themeColor}, 0.3)`
         }}>
           {assessment.icon}
         </div>
       </div>
 
-      <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-        {assessment.title === 'RIASEC/Holland Code' ? (
-          <div style={{
-            background: `rgba(${themeColor}, 0.15)`,
-            padding: '18px',
-            borderRadius: '15px',
-            border: `1px solid rgba(${themeColor}, 0.3)`,
-            textAlign: 'center'
+      {assessment.description && (
+        <div style={{
+          background: `rgba(${themeColor}, 0.1)`,
+          padding: '15px',
+          borderRadius: '12px',
+          border: `1px solid rgba(${themeColor}, 0.2)`,
+          marginBottom: '20px'
+        }}>
+          <p style={{
+            color: '#d1d5db',
+            fontSize: '13px',
+            textAlign: 'right',
+            lineHeight: '1.6',
+            margin: 0,
+            direction: 'rtl'
           }}>
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: '1fr 1fr',
-              gap: '15px'
-            }}>
-              <div style={{ textAlign: 'center' }}>
-                <div style={{ color: `rgb(${themeColor})`, fontSize: '13px', fontWeight: 'bold' }}>النسخ العالمية</div>
-                <div style={{ color: 'white', fontSize: '16px', fontWeight: 'bold' }}>30-180 سؤال</div>
-              </div>
-              <div style={{ textAlign: 'center' }}>
-                <div style={{ color: `rgb(${themeColor})`, fontSize: '13px', fontWeight: 'bold' }}>School2Career</div>
-                <div style={{ color: 'white', fontSize: '16px', fontWeight: 'bold' }}>مطور بذكاء</div>
-              </div>
-            </div>
-          </div>
-        ) : (
-          <div style={{
-            background: `rgba(${themeColor}, 0.2)`,
-            padding: '15px',
-            borderRadius: '15px',
-            border: `1px solid rgba(${themeColor}, 0.3)`
-          }}>
-            <div style={{ color: `rgb(${themeColor})`, fontSize: '13px', fontWeight: 'bold' }}>الوقت المطلوب</div>
-            <div style={{ color: 'white', fontSize: '18px', fontWeight: 'bold' }}>{assessment.time}</div>
-          </div>
-        )}
-      </div>
+            {assessment.description}
+          </p>
+        </div>
+      )}
 
-      <button 
+      {assessment.time && (
+        <div style={{
+          background: `rgba(${themeColor}, 0.15)`,
+          padding: '12px',
+          borderRadius: '12px',
+          border: `1px solid rgba(${themeColor}, 0.3)`,
+          textAlign: 'center',
+          marginBottom: '20px'
+        }}>
+          <div style={{ color: `rgb(${themeColor})`, fontSize: '12px', fontWeight: 'bold' }}>الوقت المطلوب</div>
+          <div style={{ color: 'white', fontSize: '16px', fontWeight: 'bold' }}>{assessment.time}</div>
+        </div>
+      )}
+
+      <button
         onClick={() => {
           if (assessment.path) {
             router.push(assessment.path)
@@ -275,10 +295,10 @@ export default function Assessments() {
         style={{
           width: '100%',
           padding: '16px',
-          background: assessment.active 
-            ? `linear-gradient(135deg, rgb(${themeColor}), rgba(${themeColor}, 0.8))` 
-            : assessment.disabled 
-              ? 'rgba(255, 255, 255, 0.1)' 
+          background: assessment.active
+            ? `linear-gradient(135deg, rgb(${themeColor}), rgba(${themeColor}, 0.8))`
+            : assessment.disabled
+              ? 'rgba(255, 255, 255, 0.1)'
               : `rgba(${themeColor}, 0.3)`,
           border: 'none',
           borderRadius: '14px',
@@ -295,9 +315,9 @@ export default function Assessments() {
 
   return (
     <>
-      {/* Shared Navigation */}
-      <SharedNavigation />
-      
+      {/* Unified Navigation */}
+      <UnifiedNavigation />
+
       {/* Animated Background */}
       <div style={{
         position: 'fixed',
@@ -310,8 +330,8 @@ export default function Assessments() {
       }}></div>
 
       {/* Main Content */}
-      <main style={{ 
-        paddingTop: '120px', 
+      <main style={{
+        paddingTop: '100px',
         paddingLeft: '160px',
         paddingRight: '160px',
         paddingBottom: '60px',
@@ -320,7 +340,7 @@ export default function Assessments() {
         margin: '0 auto',
         direction: 'rtl'
       }}>
-        
+
         {/* Header Section */}
         <div style={{
           background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.08), rgba(118, 75, 162, 0.08))',

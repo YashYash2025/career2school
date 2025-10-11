@@ -1,10 +1,13 @@
-'use client';
+﻿'use client';
 
 import React, { useState, useEffect, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import useRIASECInternational from '../../../hooks/useRIASECInternational';
 import RIASECInternationalResults from '../../../components/assessments/RIASECInternationalResults';
 import RIASECSchool2CareerResults from '../../../components/assessments/RIASECSchool2CareerResults';
+import AnswerCard from '../../../components/assessments/AnswerCard';
+import AssessmentHeader from '../../../components/assessments/AssessmentHeader';
+import UnifiedNavigation from '../../../components/UnifiedNavigation';
 // Import chart libraries
 import {
   Chart as ChartJS,
@@ -21,12 +24,12 @@ import {
   Filler,
 } from 'chart.js';
 import { Line, Bar, Radar, Doughnut } from 'react-chartjs-2';
-import { 
-  RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, 
-  Radar as RechartsRadar, ResponsiveContainer, BarChart, 
-  Bar as RechartsBar, XAxis, YAxis, CartesianGrid, 
-  Tooltip as RechartsTooltip, Legend as RechartsLegend, 
-  PieChart, Pie, Cell 
+import {
+  RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
+  Radar as RechartsRadar, ResponsiveContainer, BarChart,
+  Bar as RechartsBar, XAxis, YAxis, CartesianGrid,
+  Tooltip as RechartsTooltip, Legend as RechartsLegend,
+  PieChart, Pie, Cell
 } from 'recharts';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
@@ -50,19 +53,20 @@ const RIASECInternationalAssessment = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const versionParam = searchParams.get('version');
-  
+
   const [currentStage, setCurrentStage] = useState(versionParam ? 'loading' : 'intro');
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState({});
   const [questions, setQuestions] = useState([]);
   const [sessionId] = useState(`riasec_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`);
   const [startTime, setStartTime] = useState(null);
+  const [localResults, setLocalResults] = useState(null); // Local state for results
   const [assessmentConfig, setAssessmentConfig] = useState({
     version: versionParam || '60',
     country: 'international',
     language: 'ar'
   });
-  
+
   // Enhanced state for new features
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [selectedChartType, setSelectedChartType] = useState('chartjs');
@@ -75,8 +79,9 @@ const RIASECInternationalAssessment = () => {
   const [linkedinJobs, setLinkedinJobs] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
   const [careerMatches, setCareerMatches] = useState([]);
+  const [showCancelModal, setShowCancelModal] = useState(false);
   const resultsRef = useRef(null);
-  
+
   // Enhanced career database with 2024 salary data
   const enhancedCareerDatabase = {
     'R': [
@@ -88,7 +93,7 @@ const RIASECInternationalAssessment = () => {
         educationLevel: '🎓 بكالوريوس (4 سنوات)',
         salaryRanges: {
           '0-2': '35,000 - 55,000 ريال/سنة',
-          '3-7': '55,000 - 85,000 ريال/سنة', 
+          '3-7': '55,000 - 85,000 ريال/سنة',
           '8-15': '85,000 - 120,000 ريال/سنة',
           '15+': '120,000 - 200,000 ريال/سنة'
         },
@@ -107,7 +112,7 @@ const RIASECInternationalAssessment = () => {
         salaryRanges: {
           '0-2': '20,000 - 35,000 ريال/سنة',
           '3-7': '35,000 - 50,000 ريال/سنة',
-          '8-15': '50,000 - 65,000 ريال/سنة', 
+          '8-15': '50,000 - 65,000 ريال/سنة',
           '15+': '65,000 - 85,000 ريال/سنة'
         },
         skills: ['استكشاف الأخطاء', 'صيانة الأجهزة', 'شبكات', 'أنظمة تشغيل'],
@@ -278,7 +283,7 @@ const RIASECInternationalAssessment = () => {
     const min = Math.min(...values);
     const range = max - min;
     const differentiation = range / (max || 1);
-    return Math.round(Math.min(100, (differentiation * 80) + (max / (questions.length/6) * 20)));
+    return Math.round(Math.min(100, (differentiation * 80) + (max / (questions.length / 6) * 20)));
   };
 
   const getMatchLevel = (percentage) => {
@@ -316,7 +321,7 @@ const RIASECInternationalAssessment = () => {
 
   const exportToPDF = async () => {
     if (!resultsRef.current) return;
-    
+
     try {
       const canvas = await html2canvas(resultsRef.current, {
         scale: 2,
@@ -324,25 +329,25 @@ const RIASECInternationalAssessment = () => {
         allowTaint: true
       });
       const imgData = canvas.toDataURL('image/png');
-      
+
       const pdf = new jsPDF();
       const imgWidth = 210;
       const pageHeight = 295;
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
       let heightLeft = imgHeight;
-      
+
       let position = 0;
-      
+
       pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
       heightLeft -= pageHeight;
-      
+
       while (heightLeft >= 0) {
         position = heightLeft - imgHeight;
         pdf.addPage();
         pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
         heightLeft -= pageHeight;
       }
-      
+
       pdf.save('riasec-assessment-results.pdf');
     } catch (error) {
       console.error('Error generating PDF:', error);
@@ -351,54 +356,85 @@ const RIASECInternationalAssessment = () => {
 
   const saveToDatabase = async (results) => {
     try {
+      console.log('💾 ========== START SAVE TO DATABASE ==========');
+      console.log('💾 Full Results Object:', JSON.stringify(results, null, 2));
+
+      // Get user_id from localStorage
+      let userId = null;
+      const storedUserData = localStorage.getItem('userData');
+      if (storedUserData) {
+        const userData = JSON.parse(storedUserData);
+        userId = userData.id;
+        console.log('📦 Using user_id from localStorage:', userId);
+      } else {
+        console.warn('⚠️ No userData in localStorage!');
+      }
+
+      // Prepare the payload
+      const payload = {
+        holland_code: results.holland_code,
+        raw_scores: results.raw_scores,
+        ranking: results.ranking,
+        confidence_score: results.indices?.consistency?.score || 0,
+        user_id: userId
+      };
+
+      console.log('📤 Sending Payload:', JSON.stringify(payload, null, 2));
+
       const response = await fetch('/api/assessments/riasec/save', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          sessionId,
-          results,
-          assessmentVersion,
-          timestamp: new Date().toISOString(),
-          duration: startTime ? Math.round((new Date() - startTime) / 1000) : 0
-        })
+        body: JSON.stringify(payload)
       });
-      
-      if (response.ok) {
-        console.log('✅ Results saved to database successfully');
+
+      console.log('📡 Response Status:', response.status);
+      console.log('📡 Response OK:', response.ok);
+
+      const data = await response.json();
+      console.log('📥 Response Data:', JSON.stringify(data, null, 2));
+
+      if (response.ok && data.success) {
+        console.log('✅ ========== SAVE SUCCESSFUL ==========');
+        console.log('✅ Assessment ID:', data.assessment_id);
         return true;
       } else {
-        console.error('❌ Failed to save results to database');
+        console.error('❌ ========== SAVE FAILED ==========');
+        console.error('❌ Error:', data.error);
+        console.error('❌ Details:', data.details);
+        console.error('❌ Code:', data.code);
         return false;
       }
     } catch (error) {
-      console.error('❌ Error saving to database:', error);
+      console.error('❌ ========== EXCEPTION IN SAVE ==========');
+      console.error('❌ Error:', error);
+      console.error('❌ Stack:', error.stack);
       return false;
     }
   };
 
   const getCareerMatches = (scores) => {
     if (!scores) return [];
-    
+
     const sortedTypes = Object.entries(scores)
-      .sort(([,a], [,b]) => b - a)
+      .sort(([, a], [, b]) => b - a)
       .slice(0, 3);
-    
+
     const primaryType = sortedTypes[0][0];
     const matches = [];
-    
+
     // Get careers for primary type
     if (enhancedCareerDatabase[primaryType]) {
       matches.push(...enhancedCareerDatabase[primaryType]);
     }
-    
+
     // Calculate match percentages based on score alignment
     return matches.map(career => {
       const primaryScore = scores[primaryType];
       const maxPossibleScore = questions.length / 6 * 3; // 3 is max per question
       const matchPercentage = Math.round((primaryScore / maxPossibleScore) * 100);
-      
+
       return {
         ...career,
         match: Math.min(matchPercentage, 98), // Cap at 98%
@@ -445,23 +481,23 @@ const RIASECInternationalAssessment = () => {
   const loadQuestions = async () => {
     try {
       console.log('🔄 Loading questions with config:', assessmentConfig);
-      
+
       // Direct API call to ensure we get the questions
       const params = new URLSearchParams({
         version: assessmentConfig.version,
         language: assessmentConfig.language,
         randomize: 'true'
       });
-      
+
       const response = await fetch(`/api/assessments/riasec/questions?${params}`);
-      
+
       if (!response.ok) {
         throw new Error(`API Error: ${response.status}`);
       }
-      
+
       const data = await response.json();
       console.log('📥 API Response:', data);
-      
+
       if (data.success && data.data && data.data.questions) {
         console.log(`✅ Loaded ${data.data.questions.length} questions from API`);
         console.log('📋 Using real database questions!');
@@ -477,7 +513,7 @@ const RIASECInternationalAssessment = () => {
       } else {
         throw new Error('Invalid API response format');
       }
-      
+
     } catch (err) {
       console.error('❌ Error loading questions:', err);
       setCurrentStage('error');
@@ -488,13 +524,16 @@ const RIASECInternationalAssessment = () => {
     const newAnswers = { ...answers, [currentQuestion]: value };
     setAnswers(newAnswers);
 
-    // Auto-advance only if it's the last question
-    if (currentQuestion === questions.length - 1) {
-      console.log('📝 آخر سؤال تم الإجابة عليه - سيبدأ حساب النتائج...');
-      setTimeout(() => {
+    // Auto-advance to next question after a short delay
+    setTimeout(() => {
+      if (currentQuestion < questions.length - 1) {
+        setCurrentQuestion(prev => prev + 1);
+      } else {
+        // Last question - finish assessment
+        console.log('📝 آخر سؤال تم الإجابة عليه - سيبدأ حساب النتائج...');
         finishAssessment(newAnswers);
-      }, 500);
-    }
+      }
+    }, 400); // 400ms delay for smooth UX
   };
 
   const goToPreviousQuestion = () => {
@@ -522,13 +561,13 @@ const RIASECInternationalAssessment = () => {
   useEffect(() => {
     const handleKeyPress = (event) => {
       if (currentStage !== 'assessment') return;
-      
+
       // Number keys for answers
       if (event.key >= '0' && event.key <= '2') {
         const value = parseInt(event.key);
         handleAnswer(value);
       }
-      
+
       // Arrow keys for navigation
       if (event.key === 'ArrowLeft' && currentQuestion > 0) {
         goToPreviousQuestion();
@@ -536,7 +575,7 @@ const RIASECInternationalAssessment = () => {
       if (event.key === 'ArrowRight' && currentQuestion < questions.length - 1 && answers[currentQuestion] !== undefined) {
         goToNextQuestion();
       }
-      
+
       // Enter to finish assessment on last question
       if (event.key === 'Enter' && currentQuestion === questions.length - 1 && answers[currentQuestion] !== undefined) {
         goToNextQuestion();
@@ -553,19 +592,19 @@ const RIASECInternationalAssessment = () => {
       console.log('📊 الإجابات النهائية:', finalAnswers);
       console.log('❓ عدد الأسئلة:', questions.length);
       console.log('⚙️ إعدادات التقييم:', assessmentConfig);
-      
+
       setCurrentStage('calculating');
-      
+
       // Format responses for the algorithm
       const formattedResponses = formatResponses(finalAnswers, questions);
       console.log('🔄 الاستجابات المنسقة:', formattedResponses);
       console.log('📈 عدد الاستجابات المنسقة:', Object.keys(formattedResponses).length);
-      
+
       // Get correct question count based on version
       const getExpectedQuestionCount = (version) => {
-        switch(version) {
+        switch (version) {
           case '30': return 30;
-          case '60': return 60; 
+          case '60': return 60;
           case '180': return 180;
           case 'school2career': return 120;
           case 'school2career-30': return 30;
@@ -574,14 +613,14 @@ const RIASECInternationalAssessment = () => {
           default: return questions.length; // Use actual loaded questions count
         }
       };
-      
+
       const expectedCount = getExpectedQuestionCount(assessmentConfig.version);
       console.log('🎯 العدد المتوقع:', expectedCount);
-      
+
       // Validate completeness
       const validation = validateResponses(formattedResponses, expectedCount);
       console.log('✅ نتائج التحقق:', validation);
-      
+
       if (!validation.isComplete) {
         console.warn(`Assessment incomplete: ${validation.completionRate}% complete (${validation.responseCount}/${validation.expectedCount})`);
       } else {
@@ -589,24 +628,43 @@ const RIASECInternationalAssessment = () => {
       }
 
       console.log('🚀 بداية استدعاء calculateResults...');
-      
+
       // Calculate results using the appropriate algorithm
       const algorithmResults = await calculateResults(formattedResponses, {
-        toolCode: (assessmentConfig.version === 'school2career' || 
-                  assessmentConfig.version.startsWith('school2career-'))
-          ? 'RIASEC_SCHOOL2CAREER' 
+        toolCode: (assessmentConfig.version === 'school2career' ||
+          assessmentConfig.version.startsWith('school2career-'))
+          ? 'RIASEC_SCHOOL2CAREER'
           : `RIASEC-${assessmentConfig.version}`,
         country: assessmentConfig.country,
-        version: assessmentConfig.version === '30' ? 'short' : 
-                 assessmentConfig.version === '60' ? 'medium' : 
-                 assessmentConfig.version === 'school2career' || 
-                 assessmentConfig.version.startsWith('school2career-') ? 'enhanced' : 'full'
+        version: assessmentConfig.version === '30' ? 'short' :
+          assessmentConfig.version === '60' ? 'medium' :
+            assessmentConfig.version === 'school2career' ||
+              assessmentConfig.version.startsWith('school2career-') ? 'enhanced' : 'full'
       });
-      
-      console.log('🎉 نتائج الخوارزمية:', algorithmResults);
 
+      console.log('🎉 نتائج الخوارزمية:', algorithmResults);
+      console.log('🔍 هل النتائج تحتوي على holland_code?', !!algorithmResults?.holland_code);
+      console.log('🔍 هل النتائج تحتوي على raw_scores?', !!algorithmResults?.raw_scores);
+      console.log('� هل النت ائج تحتوي على ranking?', !!algorithmResults?.ranking);
+
+      // Save to database
+      console.log('💾 Calling saveToDatabase...');
+      const saved = await saveToDatabase(algorithmResults);
+      console.log('💾 Save result:', saved);
+
+      if (saved) {
+        console.log('✅ تم حفظ النتائج بنجاح في قاعدة البيانات');
+      } else {
+        console.warn('⚠️ فشل حفظ النتائج - لكن سنعرض النتائج للمستخدم');
+      }
+
+      // Store results in local state for immediate access
+      setLocalResults(algorithmResults);
+      console.log('📦 Stored results in local state:', algorithmResults);
+
+      // Transition to results stage
       setCurrentStage('results');
-      
+
     } catch (err) {
       console.error('❌ خطأ في حساب النتائج:', err);
       console.error('❌ تفاصيل الخطأ:', err.stack);
@@ -619,6 +677,7 @@ const RIASECInternationalAssessment = () => {
     setCurrentQuestion(0);
     setAnswers({});
     setQuestions([]);
+    setLocalResults(null);
     clearError();
   };
 
@@ -629,14 +688,19 @@ const RIASECInternationalAssessment = () => {
   // Intro Stage
   if (currentStage === 'intro') {
     return (
-      <div style={{
-        minHeight: '100vh',
-        background: `linear-gradient(135deg, ${colors.dark} 0%, #1a1a2e 50%, #16213e 100%)`,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '20px'
-      }}>
+      <>
+        {/* Navigation */}
+        <UnifiedNavigation showBackButton={true} backUrl="/assessments" />
+        
+        <div style={{
+          minHeight: '100vh',
+          background: `linear-gradient(135deg, ${colors.dark} 0%, #1a1a2e 50%, #16213e 100%)`,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '20px',
+          paddingTop: '100px'
+        }}>
         <div style={{
           maxWidth: '900px',
           width: '100%',
@@ -663,7 +727,7 @@ const RIASECInternationalAssessment = () => {
             }}>
               🎯
             </div>
-            
+
             <h1 style={{ fontSize: '42px', fontWeight: 'bold', color: colors.text, marginBottom: '15px' }}>
               تقييم RIASEC الدولي المتقدم
             </h1>
@@ -682,35 +746,35 @@ const RIASECInternationalAssessment = () => {
             </h3>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px' }}>
               {[
-                { 
-                  version: '30', 
-                  title: 'النسخة السريعة', 
-                  duration: '10-15 دقيقة', 
+                {
+                  version: '30',
+                  title: 'النسخة السريعة',
+                  duration: '10-15 دقيقة',
                   questions: '30 سؤال',
                   description: 'مثالية للتقييم السريع والحصول على فكرة عامة عن الميول',
                   icon: '⚡'
                 },
-                { 
-                  version: '60', 
-                  title: 'النسخة المتوسطة', 
-                  duration: '20-25 دقيقة', 
-                  questions: '60 سؤال', 
+                {
+                  version: '60',
+                  title: 'النسخة المتوسطة',
+                  duration: '20-25 دقيقة',
+                  questions: '60 سؤال',
                   recommended: true,
                   description: 'توازن مثالي بين الدقة والوقت - موصى بها للأغلبية',
                   icon: '🎯'
                 },
-                { 
-                  version: '180', 
-                  title: 'النسخة الشاملة', 
-                  duration: '45-60 دقيقة', 
+                {
+                  version: '180',
+                  title: 'النسخة الشاملة',
+                  duration: '45-60 دقيقة',
                   questions: '180 سؤال',
                   description: 'التحليل الأكثر دقة وتفصيلاً مع تقرير شامل ومفصل',
                   icon: '📊'
                 },
-                { 
-                  version: 'school2career', 
-                  title: 'نسخة School2Career المطورة', 
-                  duration: '30-35 دقيقة', 
+                {
+                  version: 'school2career',
+                  title: 'نسخة School2Career المطورة',
+                  duration: '30-35 دقيقة',
                   questions: '120 سؤال',
                   featured: true,
                   description: 'نسخة حديثة تركز على الوظائف المستقبلية مع تقارير ملهمة تساعدك على تحقيق أحلامك المهنية',
@@ -722,11 +786,11 @@ const RIASECInternationalAssessment = () => {
                   onClick={() => setAssessmentConfig(prev => ({ ...prev, version: option.version }))}
                   style={{
                     padding: '25px',
-                    background: assessmentConfig.version === option.version 
+                    background: assessmentConfig.version === option.version
                       ? `linear-gradient(135deg, ${colors.primary}, ${colors.secondary})`
                       : 'rgba(255, 255, 255, 0.05)',
-                    border: `2px solid ${assessmentConfig.version === option.version 
-                      ? 'rgba(102, 126, 234, 0.8)' 
+                    border: `2px solid ${assessmentConfig.version === option.version
+                      ? 'rgba(102, 126, 234, 0.8)'
                       : 'rgba(255, 255, 255, 0.1)'}`,
                     borderRadius: '20px',
                     color: colors.text,
@@ -736,8 +800,8 @@ const RIASECInternationalAssessment = () => {
                     textAlign: 'right', // Right-align text for Arabic
                     direction: 'rtl', // RTL direction
                     transform: assessmentConfig.version === option.version ? 'scale(1.02)' : 'scale(1)',
-                    boxShadow: assessmentConfig.version === option.version 
-                      ? '0 8px 25px rgba(102, 126, 234, 0.3)' 
+                    boxShadow: assessmentConfig.version === option.version
+                      ? '0 8px 25px rgba(102, 126, 234, 0.3)'
                       : '0 4px 15px rgba(0, 0, 0, 0.1)'
                   }}
                   onMouseEnter={(e) => {
@@ -834,11 +898,11 @@ const RIASECInternationalAssessment = () => {
                   onClick={() => setAssessmentConfig(prev => ({ ...prev, country: country.code }))}
                   style={{
                     padding: '12px 20px',
-                    background: assessmentConfig.country === country.code 
+                    background: assessmentConfig.country === country.code
                       ? `linear-gradient(135deg, ${colors.primary}, ${colors.secondary})`
                       : 'rgba(255, 255, 255, 0.05)',
-                    border: `1px solid ${assessmentConfig.country === country.code 
-                      ? 'rgba(102, 126, 234, 0.8)' 
+                    border: `1px solid ${assessmentConfig.country === country.code
+                      ? 'rgba(102, 126, 234, 0.8)'
                       : 'rgba(255, 255, 255, 0.1)'}`,
                     borderRadius: '10px',
                     color: colors.text,
@@ -891,8 +955,8 @@ const RIASECInternationalAssessment = () => {
             style={{
               width: '100%',
               padding: '18px',
-              background: loading 
-                ? 'rgba(255, 255, 255, 0.1)' 
+              background: loading
+                ? 'rgba(255, 255, 255, 0.1)'
                 : `linear-gradient(135deg, ${colors.primary}, ${colors.secondary})`,
               color: 'white',
               border: 'none',
@@ -926,7 +990,7 @@ const RIASECInternationalAssessment = () => {
               </>
             )}
           </button>
-          
+
           {/* Auto-start button if version is provided via URL */}
           {versionParam && (
             <button
@@ -950,7 +1014,7 @@ const RIASECInternationalAssessment = () => {
               ⚡ بدء مباشر - نسخة {versionParam === 'school2career' ? 'School2Career (120 سؤال)' : `${versionParam} سؤال`}
             </button>
           )}
-          
+
           {/* Error Display */}
           {error && (
             <div style={{
@@ -967,7 +1031,8 @@ const RIASECInternationalAssessment = () => {
             </div>
           )}
         </div>
-      </div>
+        </div>
+      </>
     );
   }
 
@@ -1004,18 +1069,18 @@ const RIASECInternationalAssessment = () => {
           justifyContent: 'center'
         }}>
           <div style={{ color: 'white', textAlign: 'center' }}>
-            <div style={{ 
-              fontSize: '48px', 
+            <div style={{
+              fontSize: '48px',
               marginBottom: '20px',
               animation: 'spin 2s linear infinite'
             }}>🔄</div>
             <div style={{ fontSize: '24px', marginBottom: '10px', direction: 'rtl' }}>جاري تحميل الأسئلة...</div>
             <div style={{ fontSize: '16px', color: colors.textSecondary, direction: 'rtl' }}>
-              نسخة {assessmentConfig.version === 'school2career' 
-                ? 'School2Career المطورة (120 سؤال)' 
-                : `${assessmentConfig.version} سؤال`} - 
-              {assessmentConfig.country === 'international' ? 'معايير دولية' : 
-               assessmentConfig.country === 'egypt' ? 'معايير مصر' : 'معايير السعودية'}
+              نسخة {assessmentConfig.version === 'school2career'
+                ? 'School2Career المطورة (120 سؤال)'
+                : `${assessmentConfig.version} سؤال`} -
+              {assessmentConfig.country === 'international' ? 'معايير دولية' :
+                assessmentConfig.country === 'egypt' ? 'معايير مصر' : 'معايير السعودية'}
             </div>
           </div>
         </div>
@@ -1026,157 +1091,43 @@ const RIASECInternationalAssessment = () => {
     const progress = ((currentQuestion + 1) / questions.length) * 100;
 
     return (
-      <div style={{
-        minHeight: '100vh',
-        background: `linear-gradient(135deg, ${colors.dark} 0%, #1a1a2e 50%, #16213e 100%)`,
-        paddingTop: '20px'
-      }}>
-        {/* Debug Info Header */}
+      <>
+        {/* Navigation */}
+        <UnifiedNavigation showBackButton={true} backUrl="/assessments" />
+        
         <div style={{
-          background: 'rgba(255, 69, 0, 0.9)',
-          backdropFilter: 'blur(20px)',
-          borderBottom: '2px solid rgba(255, 69, 0, 0.3)',
-          padding: '15px',
-          marginBottom: '10px',
-          direction: 'rtl'
+          minHeight: '100vh',
+          background: `linear-gradient(135deg, ${colors.dark} 0%, #1a1a2e 50%, #16213e 100%)`,
+          paddingTop: '80px'
         }}>
-          <div style={{ maxWidth: '1200px', margin: '0 auto', color: 'white' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px', fontSize: '14px' }}>
-              <div>
-                <strong>📄 معلومات السؤال:</strong><br/>
-                ID: {currentQ.id}<br/>
-                Order: {currentQ.order}<br/>
-                Type: {currentQ.type}<br/>
-                Tool Code: RIASEC_{assessmentConfig.version}
-              </div>
-              <div>
-                <strong>🔤 النصوص:</strong><br/>
-                العربي: {currentQ.text || currentQ.question_ar || currentQ.activity_ar || 'غير متوفر'}<br/>
-                English: {currentQ.question_en || currentQ.activity_en || currentQ.text_en || 'غير متوفر'}<br/>
-                Français: {currentQ.question_fr || currentQ.activity_fr || currentQ.text_fr || 'غير متوفر'}
-              </div>
-              <div>
-                <strong>📊 معلومات التقييم:</strong><br/>
-                النسخة: {assessmentConfig.version}<br/>
-                البلد: {assessmentConfig.country}<br/>
-                اللغة: {assessmentConfig.language}<br/>
-                عدد الأسئلة: {questions.length}
-              </div>
-              <div>
-                <strong>✅ حالة الإجابة:</strong><br/>
-                الإجابة الحالية: {answers[currentQuestion] !== undefined ? 
-                  (answers[currentQuestion] === -1 ? 'لا أحب (0)' : 
-                   answers[currentQuestion] === 0 ? 'محايد (0)' : 'أحب (1)') : 'لم يتم الإجابة'}<br/>
-                تم الإجابة على: {Object.keys(answers).length} من {questions.length}
-              </div>
+        {/* Progress Section */}
+        <div style={{ maxWidth: '800px', margin: '0 auto', padding: '20px' }}>
+          {/* Question Counter */}
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: '15px',
+            direction: 'rtl'
+          }}>
+            <div style={{
+              fontSize: '18px',
+              fontWeight: 'bold',
+              color: colors.text,
+              fontFamily: 'Cairo, Arial, sans-serif'
+            }}>
+              السؤال {currentQuestion + 1} من {questions.length}
             </div>
-            
-            {/* Raw Data Debug */}
-            <div style={{ marginTop: '10px', fontSize: '12px', background: 'rgba(0,0,0,0.3)', padding: '10px', borderRadius: '8px' }}>
-              <strong>🔍 بيانات السؤال الخام:</strong><br/>
-              {JSON.stringify(currentQ, null, 2)}
+            <div style={{
+              fontSize: '18px',
+              fontWeight: 'bold',
+              color: '#10b981'
+            }}>
+              {Math.round(progress)}%
             </div>
           </div>
-        </div>
-
-        {/* Header */}
-        <div style={{
-          background: 'rgba(15, 15, 30, 0.98)',
-          backdropFilter: 'blur(20px)',
-          borderBottom: '2px solid rgba(102, 126, 234, 0.3)',
-          padding: '20px'
-        }}>
-          <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
-              <button
-                onClick={() => setCurrentStage('intro')}
-                style={{
-                  background: `linear-gradient(135deg, ${colors.primary}, ${colors.secondary})`,
-                  color: 'white',
-                  border: 'none',
-                  padding: '12px 20px',
-                  borderRadius: '10px',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  fontWeight: '600'
-                }}
-              >
-                <span>←</span>
-                العودة للإعدادات
-              </button>
-              
-              <button
-                onClick={goToPreviousQuestion}
-                disabled={currentQuestion === 0}
-                style={{
-                  background: currentQuestion === 0 ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.15)',
-                  color: currentQuestion === 0 ? colors.textSecondary : colors.text,
-                  border: `1px solid ${currentQuestion === 0 ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.3)'}`,
-                  padding: '10px 16px',
-                  borderRadius: '8px',
-                  cursor: currentQuestion === 0 ? 'not-allowed' : 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  transition: 'all 0.3s ease'
-                }}
-              >
-                <span>⇦</span>
-                السؤال السابق
-              </button>
-            </div>
-            
-            <div style={{ color: colors.text, textAlign: 'center' }}>
-              <div style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '4px' }}>
-                السؤال {currentQuestion + 1} من {questions.length}
-              </div>
-              <div style={{ fontSize: '14px', color: colors.textSecondary, display: 'flex', alignItems: 'center', gap: '15px', justifyContent: 'center' }}>
-                <span style={{ 
-                  background: 'rgba(102, 126, 234, 0.2)', 
-                  padding: '4px 10px', 
-                  borderRadius: '12px',
-                  fontWeight: '600'
-                }}>
-                  📊 النسخة: {assessmentConfig.version === 'school2career' 
-                    ? 'School2Career المطورة' 
-                    : `${assessmentConfig.version} سؤال`}
-                </span>
-                <span style={{ 
-                  background: 'rgba(118, 75, 162, 0.2)', 
-                  padding: '4px 10px', 
-                  borderRadius: '12px',
-                  fontWeight: '600'
-                }}>
-                  🌍 المعايير: {assessmentConfig.country === 'international' ? 'دولية' : assessmentConfig.country === 'egypt' ? 'مصر' : 'السعودية'}
-                </span>
-              </div>
-            </div>
-            
-            <div style={{ color: colors.text, textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'end' }}>
-              <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#10b981' }}>{Math.round(progress)}%</div>
-              <div style={{ fontSize: '12px', color: colors.textSecondary, marginTop: '2px' }}>مكتمل</div>
-              {answers[currentQuestion] !== undefined && (
-                <div style={{ 
-                  fontSize: '11px', 
-                  color: '#f59e0b', 
-                  marginTop: '4px',
-                  background: 'rgba(245, 158, 11, 0.1)',
-                  padding: '2px 8px',
-                  borderRadius: '8px'
-                }}>
-                  تم الإجابة: {answers[currentQuestion] === 2 ? 'أوافق بشدة' : answers[currentQuestion] === 1 ? 'أوافق' : 'لا أوافق'}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Progress Bar */}
-        <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '20px' }}>
+          
+          {/* Progress Bar */}
           <div style={{
             width: '100%',
             height: '6px',
@@ -1204,10 +1155,10 @@ const RIASECInternationalAssessment = () => {
             textAlign: 'center',
             direction: 'rtl' // RTL support for Arabic
           }}>
-            <h2 style={{ 
-              fontSize: '28px', 
-              color: colors.text, 
-              marginBottom: '30px', 
+            <h2 style={{
+              fontSize: '28px',
+              color: colors.text,
+              marginBottom: '30px',
               lineHeight: '1.6',
               textAlign: 'center',
               direction: 'rtl',
@@ -1216,174 +1167,242 @@ const RIASECInternationalAssessment = () => {
             }}>
               {currentQ.text || currentQ.question_ar || 'سؤال غير متوفر'}
             </h2>
-            
-            {/* Answer Options - Clean layout without tips */}
-            <div style={{ 
+
+            {/* Answer Options - Using AnswerCard Component */}
+            <div style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(3, 1fr)',
-              gap: '20px', 
+              gap: '20px',
               marginBottom: '30px',
-              maxWidth: '600px',
+              maxWidth: '700px',
               margin: '0 auto 30px auto'
             }}>
               {[
-                { 
-                  value: -1, // نستخدم -1 للعرض، لكن نحوله لـ 0 عند الحساب
-                  label_ar: 'لا أحب', 
-                  label_en: 'Dislike', 
-                  label_fr: 'Je n\'aime pas', 
-                  emoji: '👎', 
-                  color: '#ef4444',
-                  bgColor: 'rgba(239, 68, 68, 0.1)',
-                  borderColor: 'rgba(239, 68, 68, 0.3)'
+                {
+                  value: -1,
+                  label: 'لا أحب',
+                  emoji: '😟',
+                  color: '#ef4444'
                 },
-                { 
-                  value: 0, 
-                  label_ar: 'محايد', 
-                  label_en: 'Neutral', 
-                  label_fr: 'Neutre', 
-                  emoji: '😐', 
-                  color: '#94a3b8',
-                  bgColor: 'rgba(148, 163, 184, 0.1)',
-                  borderColor: 'rgba(148, 163, 184, 0.3)'
+                {
+                  value: 0,
+                  label: 'محايد',
+                  emoji: '😐',
+                  color: '#f59e0b'
                 },
-                { 
-                  value: 1, 
-                  label_ar: 'أحب', 
-                  label_en: 'Like', 
-                  label_fr: 'J\'aime', 
-                  emoji: '👍', 
-                  color: '#10b981',
-                  bgColor: 'rgba(16, 185, 129, 0.1)',
-                  borderColor: 'rgba(16, 185, 129, 0.3)'
+                {
+                  value: 1,
+                  label: 'أحب',
+                  emoji: '😊',
+                  color: '#10b981'
                 }
               ].map((option) => (
-                <button
+                <AnswerCard
                   key={option.value}
-                  onClick={() => handleAnswer(option.value)}
-                  style={{
-                    padding: '24px 20px',
-                    background: answers[currentQuestion] === option.value 
-                      ? option.bgColor 
-                      : 'rgba(255, 255, 255, 0.08)',
-                    border: answers[currentQuestion] === option.value 
-                      ? `3px solid ${option.color}` 
-                      : '2px solid rgba(255, 255, 255, 0.15)',
-                    borderRadius: '20px',
-                    color: colors.text,
-                    cursor: 'pointer',
-                    width: '100%',
-                    height: '160px',
-                    transition: 'all 0.3s ease',
-                    transform: answers[currentQuestion] === option.value ? 'scale(1.02)' : 'scale(1)',
-                    textAlign: 'center',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    boxShadow: answers[currentQuestion] === option.value 
-                      ? `0 8px 25px ${option.color}40` 
-                      : '0 4px 15px rgba(0, 0, 0, 0.1)',
-                    backdropFilter: 'blur(10px)'
-                  }}
-                  onMouseEnter={(e) => {
-                    if (answers[currentQuestion] !== option.value) {
-                      e.target.style.background = option.bgColor;
-                      e.target.style.borderColor = option.borderColor;
-                      e.target.style.transform = 'translateY(-4px) scale(1.02)';
-                      e.target.style.boxShadow = `0 8px 25px ${option.color}30`;
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (answers[currentQuestion] !== option.value) {
-                      e.target.style.background = 'rgba(255, 255, 255, 0.08)';
-                      e.target.style.borderColor = 'rgba(255, 255, 255, 0.15)';
-                      e.target.style.transform = 'translateY(0) scale(1)';
-                      e.target.style.boxShadow = '0 4px 15px rgba(0, 0, 0, 0.1)';
-                    }
-                  }}
-                >
-                  <div style={{ fontSize: '50px', marginBottom: '15px' }}>{option.emoji}</div>
-                  <div style={{ 
-                    fontSize: '20px', 
-                    fontWeight: 'bold', 
-                    marginBottom: '8px',
-                    direction: 'rtl',
-                    lineHeight: '1.3',
-                    color: colors.text,
-                    fontFamily: 'Cairo, Arial, sans-serif'
-                  }}>
-                    {option.label_ar}
-                  </div>
-                </button>
+                  value={option.value}
+                  emoji={option.emoji}
+                  label={option.label}
+                  color={option.color}
+                  isSelected={answers[currentQuestion] === option.value}
+                  onClick={handleAnswer}
+                  autoAdvance={true}
+                />
               ))}
             </div>
 
-            {/* Navigation Buttons - RTL layout */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '30px', direction: 'rtl' }}>
+            {/* Status indicator */}
+            <div style={{
+              textAlign: 'center',
+              marginTop: '20px',
+              color: colors.textSecondary,
+              fontSize: '14px',
+              fontFamily: 'Cairo, Arial, sans-serif',
+              direction: 'rtl'
+            }}>
+              {answers[currentQuestion] !== undefined ? (
+                <span style={{ color: '#10b981', fontWeight: '600' }}>
+                  ✓ تم الإجابة - سينتقل تلقائياً للسؤال التالي
+                </span>
+              ) : (
+                <span>
+                  اختر إجابتك للانتقال للسؤال التالي
+                </span>
+              )}
+            </div>
+
+            {/* Action Buttons */}
+            <div style={{
+              display: 'flex',
+              justifyContent: 'center',
+              gap: '15px',
+              marginTop: '30px',
+              direction: 'rtl'
+            }}>
+              {/* Previous Question Button */}
+              {currentQuestion > 0 && (
+                <button
+                  onClick={goToPreviousQuestion}
+                  style={{
+                    padding: '12px 24px',
+                    background: 'rgba(255, 255, 255, 0.08)',
+                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    borderRadius: '12px',
+                    color: colors.text,
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease',
+                    fontFamily: 'Cairo, Arial, sans-serif',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '8px'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.12)';
+                    e.currentTarget.style.transform = 'translateY(-2px)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.08)';
+                    e.currentTarget.style.transform = 'translateY(0)';
+                  }}
+                >
+                  ← السؤال السابق
+                </button>
+              )}
+
+              {/* Cancel Button */}
               <button
-                onClick={goToNextQuestion}
-                disabled={currentQuestion >= questions.length - 1 || answers[currentQuestion] === undefined}
+                onClick={() => setShowCancelModal(true)}
                 style={{
                   padding: '12px 24px',
-                  background: (currentQuestion >= questions.length - 1 || answers[currentQuestion] === undefined) 
-                    ? 'rgba(255, 255, 255, 0.05)' 
-                    : `linear-gradient(135deg, ${colors.primary}, ${colors.secondary})`,
-                  color: (currentQuestion >= questions.length - 1 || answers[currentQuestion] === undefined) 
-                    ? colors.textSecondary 
-                    : 'white',
-                  border: 'none',
+                  background: 'rgba(239, 68, 68, 0.1)',
+                  border: '1px solid rgba(239, 68, 68, 0.3)',
                   borderRadius: '12px',
-                  cursor: (currentQuestion >= questions.length - 1 || answers[currentQuestion] === undefined) 
-                    ? 'not-allowed' 
-                    : 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
+                  color: '#ef4444',
                   fontSize: '14px',
                   fontWeight: '600',
+                  cursor: 'pointer',
                   transition: 'all 0.3s ease',
-                  direction: 'rtl'
-                }}
-              >
-                <span>←</span> {/* Left arrow for RTL next */}
-                {currentQuestion >= questions.length - 1 ? 'إنهاء التقييم' : 'السؤال التالي'}
-              </button>
-
-              <div style={{ color: colors.textSecondary, fontSize: '14px', textAlign: 'center' }}>
-                {answers[currentQuestion] !== undefined ? (
-                  <span style={{ color: '#10b981' }}>✓ تم الإجابة</span>
-                ) : (
-                  'اختر إجابتك'
-                )}
-              </div>
-
-              <button
-                onClick={goToPreviousQuestion}
-                disabled={currentQuestion === 0}
-                style={{
-                  padding: '12px 24px',
-                  background: currentQuestion === 0 ? 'rgba(255, 255, 255, 0.05)' : 'rgba(255, 255, 255, 0.1)',
-                  color: currentQuestion === 0 ? colors.textSecondary : colors.text,
-                  border: `1px solid ${currentQuestion === 0 ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.3)'}`,
-                  borderRadius: '12px',
-                  cursor: currentQuestion === 0 ? 'not-allowed' : 'pointer',
-                  display: 'flex',
+                  fontFamily: 'Cairo, Arial, sans-serif',
+                  display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '8px',
-                  fontSize: '14px',
-                  fontWeight: '600',
-                  transition: 'all 0.3s ease',
-                  direction: 'rtl'
+                  gap: '8px'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'rgba(239, 68, 68, 0.15)';
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)';
+                  e.currentTarget.style.transform = 'translateY(0)';
                 }}
               >
-                السؤال السابق
-                <span>→</span> {/* Right arrow for RTL previous */}
+                ❌ إلغاء التقييم
               </button>
             </div>
+
+            {/* Cancel Confirmation Modal */}
+            {showCancelModal && (
+              <div style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                background: 'rgba(0, 0, 0, 0.7)',
+                backdropFilter: 'blur(5px)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                zIndex: 1000,
+                animation: 'fadeIn 0.3s ease'
+              }}>
+                <div style={{
+                  background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
+                  borderRadius: '16px',
+                  padding: '30px',
+                  maxWidth: '400px',
+                  width: '90%',
+                  border: '1px solid rgba(239, 68, 68, 0.3)',
+                  boxShadow: '0 20px 60px rgba(0, 0, 0, 0.5)',
+                  direction: 'rtl',
+                  textAlign: 'center'
+                }}>
+                  <div style={{ fontSize: '48px', marginBottom: '15px' }}>⚠️</div>
+                  <h3 style={{
+                    fontSize: '20px',
+                    color: '#ffffff',
+                    marginBottom: '12px',
+                    fontFamily: 'Cairo, Arial, sans-serif'
+                  }}>
+                    هل أنت متأكد؟
+                  </h3>
+                  <p style={{
+                    fontSize: '14px',
+                    color: '#a8a8b8',
+                    marginBottom: '25px',
+                    lineHeight: '1.5',
+                    fontFamily: 'Cairo, Arial, sans-serif'
+                  }}>
+                    سيتم فقدان جميع إجاباتك. هل تريد إلغاء التقييم؟
+                  </p>
+
+                  <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+                    <button
+                      onClick={() => router.push('/assessments')}
+                      style={{
+                        padding: '10px 24px',
+                        background: 'linear-gradient(135deg, #ef4444, #dc2626)',
+                        border: 'none',
+                        borderRadius: '10px',
+                        color: '#ffffff',
+                        fontSize: '14px',
+                        fontWeight: 'bold',
+                        cursor: 'pointer',
+                        transition: 'all 0.3s ease',
+                        fontFamily: 'Cairo, Arial, sans-serif'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.transform = 'scale(1.05)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.transform = 'scale(1)';
+                      }}
+                    >
+                      نعم، إلغاء
+                    </button>
+
+                    <button
+                      onClick={() => setShowCancelModal(false)}
+                      style={{
+                        padding: '10px 24px',
+                        background: 'rgba(255, 255, 255, 0.1)',
+                        border: '1px solid rgba(255, 255, 255, 0.2)',
+                        borderRadius: '10px',
+                        color: '#ffffff',
+                        fontSize: '14px',
+                        fontWeight: 'bold',
+                        cursor: 'pointer',
+                        transition: 'all 0.3s ease',
+                        fontFamily: 'Cairo, Arial, sans-serif'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = 'rgba(255, 255, 255, 0.15)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
+                      }}
+                    >
+                      لا، متابعة
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
-      </div>
+        </div>
+      </>
     );
   }
 
@@ -1410,11 +1429,18 @@ const RIASECInternationalAssessment = () => {
 
   // Results Stage
   if (currentStage === 'results') {
+    console.log('🎨 Rendering results stage');
+    console.log('📊 localResults:', localResults);
+    console.log('� resullts from hook:', results);
+    console.log('🔍 Using:', localResults || results);
+
+    const resultsToUse = localResults || results;
+
     // Choose appropriate results component based on version
     if (assessmentConfig.version === 'school2career' || assessmentConfig.version.startsWith('school2career-')) {
       return (
         <RIASECSchool2CareerResults
-          algorithmResults={results?.algorithm_results}
+          algorithmResults={resultsToUse}
           onRetakeAssessment={retakeAssessment}
           onBackToAssessments={backToAssessments}
           userInfo={{ sessionId, startTime, config: assessmentConfig }}
@@ -1423,7 +1449,7 @@ const RIASECInternationalAssessment = () => {
     } else {
       return (
         <RIASECInternationalResults
-          algorithmResults={results?.algorithm_results}
+          algorithmResults={resultsToUse}
           onRetakeAssessment={retakeAssessment}
           onBackToAssessments={backToAssessments}
           userInfo={{ sessionId, startTime, config: assessmentConfig }}

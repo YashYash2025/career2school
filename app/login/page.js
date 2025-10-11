@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@supabase/supabase-js'
@@ -19,6 +19,21 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false)
   const router = useRouter()
   const { actions } = useAppContext()
+  
+  // Get redirect URL from query params
+  const [redirectUrl, setRedirectUrl] = useState('/dashboard')
+  
+  // Extract redirect parameter on mount
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search)
+      const redirect = params.get('redirect')
+      if (redirect) {
+        setRedirectUrl(decodeURIComponent(redirect))
+        console.log('🔗 Redirect URL detected:', redirect)
+      }
+    }
+  }, [])
 
   // دالة تسجيل الدخول بـ Google
   const handleGoogleLogin = async () => {
@@ -47,7 +62,7 @@ export default function Login() {
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'facebook',
         options: {
-          redirectTo: `${window.location.origin}/dashboard`, // عودة للداشبورد مباشرة
+          redirectTo: `${window.location.origin}${redirectUrl}`, // استخدام redirectUrl
           scopes: 'public_profile', // فقط public_profile بدون email
           queryParams: {
             scope: 'public_profile' // تأكيد إضافي
@@ -95,6 +110,21 @@ export default function Login() {
       if (response.ok && result.success) {
         console.log('✅ تم تسجيل الدخول بنجاح:', result)
         
+        // Set Supabase session first
+        if (result.session?.access_token && result.session?.refresh_token) {
+          console.log('🔐 Setting Supabase session...')
+          const { error: sessionError } = await supabase.auth.setSession({
+            access_token: result.session.access_token,
+            refresh_token: result.session.refresh_token
+          })
+          
+          if (sessionError) {
+            console.error('❌ Error setting session:', sessionError)
+          } else {
+            console.log('✅ Supabase session set successfully')
+          }
+        }
+        
         // حفظ بيانات المستخدم في localStorage
         const userData = {
           id: result.user.id,
@@ -115,7 +145,8 @@ export default function Login() {
         alert('مرحباً بك مرة أخرى، ' + userData.name + '!')
         
         setIsLoading(false)
-        router.push('/dashboard')
+        console.log('🚀 Redirecting to:', redirectUrl)
+        router.push(redirectUrl)
       } else {
         console.error('❌ فشل في تسجيل الدخول:', result)
         

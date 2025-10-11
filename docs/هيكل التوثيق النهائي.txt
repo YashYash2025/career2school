@@ -1,0 +1,12 @@
+docs/
+├── README.md                          # الدليل الرئيسي
+├── 00-SCHOOL2CAREER-OVERVIEW.md      # ⭐ نظرة شاملة (ابدأ من هنا!)
+├── 01-DESIGN-SYSTEM.md               # نظام التصميم
+├── 02-NAVIGATION.md                  # التنقل
+├── 03-BRANDING.md                    # العلامات التجارية
+├── 04-BIG5-ASSESSMENT.md             # Big5 (مكتمل)
+├── 05-RIASEC-ASSESSMENT.md           # RIASEC (مكتمل)
+├── 06-ASSESSMENT-TEMPLATE.md         # قالب التقييمات
+├── 07-DATABASE-SCHEMA.md             # قاعدة البيانات
+├── 08-API-ENDPOINTS.md               # APIs
+└── 09-ALGORITHMS.md                  # الخوارزميات

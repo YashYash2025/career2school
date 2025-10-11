@@ -2,14 +2,19 @@
 
 export default function StatsTab({ user, assessments }) {
   // Calculate stats from assessments
+  const riasecAssessments = assessments?.filter(a => a.type === 'RIASEC') || [];
+  const big5Assessments = assessments?.filter(a => a.type === 'BIG5') || [];
+  
   const stats = {
     total_assessments: assessments?.length || 0,
-    average_confidence: assessments?.length > 0 
-      ? Math.round(assessments.reduce((sum, a) => sum + (a.confidence_score || 0), 0) / assessments.length)
+    riasec_count: riasecAssessments.length,
+    big5_count: big5Assessments.length,
+    average_confidence: riasecAssessments.length > 0 
+      ? Math.round(riasecAssessments.reduce((sum, a) => sum + (a.confidence_score || 0), 0) / riasecAssessments.length)
       : 0,
     latest_assessment: assessments?.[0]?.completed_date || null,
-    most_common_type: assessments?.length > 0 
-      ? assessments[0]?.primary_type?.type || 'N/A'
+    most_common_type: riasecAssessments.length > 0 
+      ? riasecAssessments[0]?.primary_type?.type || 'N/A'
       : 'N/A'
   };
 
@@ -43,9 +48,18 @@ export default function StatsTab({ user, assessments }) {
             color: 'var(--text-secondary)',
             fontSize: '16px',
             fontFamily: 'Cairo, Arial, sans-serif',
-            direction: 'rtl'
+            direction: 'rtl',
+            marginBottom: '8px'
           }}>
             تقييم مكتمل
+          </div>
+          <div style={{
+            color: 'var(--text-secondary)',
+            fontSize: '12px',
+            fontFamily: 'Cairo, Arial, sans-serif',
+            direction: 'rtl'
+          }}>
+            {stats.riasec_count} RIASEC • {stats.big5_count} Big5
           </div>
         </div>
 
@@ -153,80 +167,112 @@ export default function StatsTab({ user, assessments }) {
 
         {assessments && assessments.length > 0 ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-            {assessments.map((assessment, index) => (
-              <div
-                key={assessment.id}
-                style={{
-                  background: 'rgba(255, 255, 255, 0.05)',
-                  borderRadius: '15px',
-                  padding: '20px',
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  border: '1px solid rgba(255, 255, 255, 0.1)'
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                  <div style={{
-                    fontSize: '32px',
-                    background: 'rgba(59, 130, 246, 0.1)',
-                    borderRadius: '10px',
-                    width: '50px',
-                    height: '50px',
+            {assessments.map((assessment, index) => {
+              const isRiasec = assessment.type === 'RIASEC';
+              const isBig5 = assessment.type === 'BIG5';
+              
+              return (
+                <div
+                  key={assessment.id}
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.05)',
+                    borderRadius: '15px',
+                    padding: '20px',
                     display: 'flex',
+                    justifyContent: 'space-between',
                     alignItems: 'center',
-                    justifyContent: 'center'
-                  }}>
-                    {assessment.primary_type?.icon || '🎯'}
-                  </div>
-                  <div>
-                    <a 
-                      href={`/assessments/riasec/results/${assessment.id}`}
-                      style={{
-                        color: 'var(--text-primary)',
-                        fontSize: '18px',
-                        fontWeight: 'bold',
-                        marginBottom: '5px',
-                        fontFamily: 'Cairo, Arial, sans-serif',
-                        direction: 'rtl',
-                        textDecoration: 'none',
-                        cursor: 'pointer',
-                        transition: 'all 0.3s ease'
-                      }}
-                      onMouseEnter={(e) => {
-                        e.target.style.color = '#3b82f6';
-                        e.target.style.textDecoration = 'underline';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.target.style.color = 'var(--text-primary)';
-                        e.target.style.textDecoration = 'none';
-                      }}
-                    >
-                      {assessment.holland_code} 🔗
-                    </a>
+                    border: `1px solid ${isRiasec ? 'rgba(59, 130, 246, 0.3)' : 'rgba(102, 126, 234, 0.3)'}`
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
                     <div style={{
-                      color: 'var(--text-secondary)',
+                      fontSize: '32px',
+                      background: isRiasec ? 'rgba(59, 130, 246, 0.1)' : 'rgba(102, 126, 234, 0.1)',
+                      borderRadius: '10px',
+                      width: '50px',
+                      height: '50px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}>
+                      {isRiasec ? (assessment.primary_type?.icon || '🎯') : (assessment.top_trait?.icon || '🌟')}
+                    </div>
+                    <div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '5px' }}>
+                        <a 
+                          href={isRiasec ? `/assessments/riasec/results/${assessment.id}` : `/assessments/big5/results/${assessment.id}`}
+                          style={{
+                            color: 'var(--text-primary)',
+                            fontSize: '18px',
+                            fontWeight: 'bold',
+                            fontFamily: 'Cairo, Arial, sans-serif',
+                            direction: 'rtl',
+                            textDecoration: 'none',
+                            cursor: 'pointer',
+                            transition: 'all 0.3s ease'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.target.style.color = '#3b82f6';
+                            e.target.style.textDecoration = 'underline';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.target.style.color = 'var(--text-primary)';
+                            e.target.style.textDecoration = 'none';
+                          }}
+                        >
+                          {isRiasec ? assessment.holland_code : assessment.profile_name} 🔗
+                        </a>
+                        <span style={{
+                          background: isRiasec ? '#3b82f6' : '#667eea',
+                          color: 'white',
+                          padding: '2px 8px',
+                          borderRadius: '8px',
+                          fontSize: '10px',
+                          fontWeight: 'bold'
+                        }}>
+                          {isRiasec ? 'RIASEC' : 'Big5'}
+                        </span>
+                      </div>
+                      <div style={{
+                        color: 'var(--text-secondary)',
+                        fontSize: '14px',
+                        fontFamily: 'Cairo, Arial, sans-serif',
+                        direction: 'rtl'
+                      }}>
+                        {new Date(assessment.completed_date).toLocaleDateString('ar-EG')}
+                      </div>
+                    </div>
+                  </div>
+                  {isRiasec && (
+                    <div style={{
+                      background: assessment.confidence_score >= 80 ? '#10b981' : 
+                                 assessment.confidence_score >= 60 ? '#3b82f6' : '#f59e0b',
+                      color: 'white',
+                      padding: '8px 16px',
+                      borderRadius: '20px',
+                      fontWeight: 'bold',
+                      fontSize: '16px'
+                    }}>
+                      {assessment.confidence_score}%
+                    </div>
+                  )}
+                  {isBig5 && (
+                    <div style={{
+                      background: 'linear-gradient(135deg, #667eea, #764ba2)',
+                      color: 'white',
+                      padding: '8px 16px',
+                      borderRadius: '20px',
+                      fontWeight: 'bold',
                       fontSize: '14px',
                       fontFamily: 'Cairo, Arial, sans-serif',
                       direction: 'rtl'
                     }}>
-                      {new Date(assessment.completed_date).toLocaleDateString('ar-EG')}
+                      {assessment.top_trait?.name}
                     </div>
-                  </div>
+                  )}
                 </div>
-                <div style={{
-                  background: assessment.confidence_score >= 80 ? '#10b981' : 
-                             assessment.confidence_score >= 60 ? '#3b82f6' : '#f59e0b',
-                  color: 'white',
-                  padding: '8px 16px',
-                  borderRadius: '20px',
-                  fontWeight: 'bold',
-                  fontSize: '16px'
-                }}>
-                  {assessment.confidence_score}%
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         ) : (
           <div style={{
