@@ -247,7 +247,26 @@ const translations = {
         technology_programming: 'التكنولوجيا والبرمجة',
         business_management: 'الأعمال والإدارة',
         arts_creativity: 'الفنون والإبداع'
-      }
+      },
+      careers: {
+        doctor: { name: 'طبيب', desc: 'تشخيص وعلاج الأمراض' },
+        engineer: { name: 'مهندس', desc: 'تصميم وبناء الحلول التقنية' },
+        data_scientist: { name: 'عالم بيانات', desc: 'تحليل البيانات واستخراج الأنماط' },
+        researcher: { name: 'باحث علمي', desc: 'إجراء البحوث والاكتشافات' },
+        app_developer: { name: 'مطور تطبيقات', desc: 'تطوير التطبيقات والمواقع' },
+        cyber_security: { name: 'مهندس أمن سيبراني', desc: 'حماية الأنظمة الرقمية' },
+        ui_designer: { name: 'مصمم واجهات', desc: 'تصميم تجربة المستخدم' },
+        systems_analyst: { name: 'محلل أنظمة', desc: 'تحليل وتطوير الأنظمة' },
+        project_manager: { name: 'مدير مشاريع', desc: 'إدارة وتنفيذ المشاريع' },
+        accountant: { name: 'محاسب', desc: 'إدارة الأمور المالية' },
+        digital_marketer: { name: 'مسوق رقمي', desc: 'التسويق عبر المنصات الرقمية' },
+        business_consultant: { name: 'مستشار أعمال', desc: 'تقديم الاستشارات الإدارية' },
+        graphic_designer: { name: 'مصمم جرافيك', desc: 'تصميم المواد البصرية' },
+        photographer: { name: 'مصور', desc: 'التصوير الفوتوغرافي والفيديو' },
+        content_writer: { name: 'كاتب محتوى', desc: 'كتابة المحتوى الإبداعي' },
+        video_editor: { name: 'مونتير', desc: 'تحرير الفيديو والصوت' }
+      },
+      market_demand: 'الطلب في السوق'
     }
   },
   en: {
@@ -492,7 +511,26 @@ const translations = {
         technology_programming: 'Technology & Programming',
         business_management: 'Business & Management',
         arts_creativity: 'Arts & Creativity'
-      }
+      },
+      careers: {
+        doctor: { name: 'Doctor', desc: 'Diagnose and treat diseases' },
+        engineer: { name: 'Engineer', desc: 'Design and build technical solutions' },
+        data_scientist: { name: 'Data Scientist', desc: 'Analyze data and extract patterns' },
+        researcher: { name: 'Scientific Researcher', desc: 'Conduct research and discoveries' },
+        app_developer: { name: 'App Developer', desc: 'Develop applications and websites' },
+        cyber_security: { name: 'Cybersecurity Engineer', desc: 'Protect digital systems' },
+        ui_designer: { name: 'UI/UX Designer', desc: 'Design user experience' },
+        systems_analyst: { name: 'Systems Analyst', desc: 'Analyze and develop systems' },
+        project_manager: { name: 'Project Manager', desc: 'Manage and execute projects' },
+        accountant: { name: 'Accountant', desc: 'Manage financial matters' },
+        digital_marketer: { name: 'Digital Marketer', desc: 'Marketing via digital platforms' },
+        business_consultant: { name: 'Business Consultant', desc: 'Provide business consulting' },
+        graphic_designer: { name: 'Graphic Designer', desc: 'Design visual materials' },
+        photographer: { name: 'Photographer', desc: 'Photography and videography' },
+        content_writer: { name: 'Content Writer', desc: 'Write creative content' },
+        video_editor: { name: 'Video Editor', desc: 'Edit video and audio' }
+      },
+      market_demand: 'Market Demand'
     }
   },
   fr: {
@@ -737,7 +775,26 @@ const translations = {
         technology_programming: 'Technologie et Programmation',
         business_management: 'Affaires et Gestion',
         arts_creativity: 'Arts et Créativité'
-      }
+      },
+      careers: {
+        doctor: { name: 'Médecin', desc: 'Diagnostiquer et traiter les maladies' },
+        engineer: { name: 'Ingénieur', desc: 'Concevoir et construire des solutions techniques' },
+        data_scientist: { name: 'Data Scientist', desc: 'Analyser les données et extraire des modèles' },
+        researcher: { name: 'Chercheur Scientifique', desc: 'Mener des recherches et découvertes' },
+        app_developer: { name: 'Développeur d\'Applications', desc: 'Développer des applications et sites web' },
+        cyber_security: { name: 'Ingénieur en Cybersécurité', desc: 'Protéger les systèmes numériques' },
+        ui_designer: { name: 'Designer UI/UX', desc: 'Concevoir l\'expérience utilisateur' },
+        systems_analyst: { name: 'Analyste de Systèmes', desc: 'Analyser et développer des systèmes' },
+        project_manager: { name: 'Chef de Projet', desc: 'Gérer et exécuter des projets' },
+        accountant: { name: 'Comptable', desc: 'Gérer les affaires financières' },
+        digital_marketer: { name: 'Marketeur Digital', desc: 'Marketing via plateformes numériques' },
+        business_consultant: { name: 'Consultant en Affaires', desc: 'Fournir des conseils en affaires' },
+        graphic_designer: { name: 'Designer Graphique', desc: 'Concevoir des matériaux visuels' },
+        photographer: { name: 'Photographe', desc: 'Photographie et vidéographie' },
+        content_writer: { name: 'Rédacteur de Contenu', desc: 'Écrire du contenu créatif' },
+        video_editor: { name: 'Monteur Vidéo', desc: 'Monter vidéo et audio' }
+      },
+      market_demand: 'Demande du Marché'
     }
   }
 }

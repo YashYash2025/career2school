@@ -18,40 +18,40 @@ export default function Careers() {
       category: t('careers_page.categories.science_tech'),
       icon: "🔬",
       careers: [
-        { name: "طبيب", desc: "تشخيص وعلاج الأمراض", demand: "عالي" },
-        { name: "مهندس", desc: "تصميم وبناء الحلول التقنية", demand: "عالي" },
-        { name: "عالم بيانات", desc: "تحليل البيانات واستخراج الأنماط", demand: "عالي جداً" },
-        { name: "باحث علمي", desc: "إجراء البحوث والاكتشافات", demand: "متوسط" }
+        { key: 'doctor', demand: "عالي" },
+        { key: 'engineer', demand: "عالي" },
+        { key: 'data_scientist', demand: "عالي جداً" },
+        { key: 'researcher', demand: "متوسط" }
       ]
     },
     {
       category: t('careers_page.categories.technology_programming'),
       icon: "💻",
       careers: [
-        { name: "مطور تطبيقات", desc: "تطوير التطبيقات والمواقع", demand: "عالي جداً" },
-        { name: "مهندس أمن سيبراني", desc: "حماية الأنظمة الرقمية", demand: "عالي جداً" },
-        { name: "مصمم واجهات", desc: "تصميم تجربة المستخدم", demand: "عالي" },
-        { name: "محلل أنظمة", desc: "تحليل وتطوير الأنظمة", demand: "عالي" }
+        { key: 'app_developer', demand: "عالي جداً" },
+        { key: 'cyber_security', demand: "عالي جداً" },
+        { key: 'ui_designer', demand: "عالي" },
+        { key: 'systems_analyst', demand: "عالي" }
       ]
     },
     {
       category: t('careers_page.categories.business_management'),
       icon: "💼",
       careers: [
-        { name: "مدير مشاريع", desc: "إدارة وتنفيذ المشاريع", demand: "عالي" },
-        { name: "محاسب", desc: "إدارة الأمور المالية", demand: "متوسط" },
-        { name: "مسوق رقمي", desc: "التسويق عبر المنصات الرقمية", demand: "عالي" },
-        { name: "مستشار أعمال", desc: "تقديم الاستشارات الإدارية", demand: "عالي" }
+        { key: 'project_manager', demand: "عالي" },
+        { key: 'accountant', demand: "متوسط" },
+        { key: 'digital_marketer', demand: "عالي" },
+        { key: 'business_consultant', demand: "عالي" }
       ]
     },
     {
       category: t('careers_page.categories.arts_creativity'),
       icon: "🎨",
       careers: [
-        { name: "مصمم جرافيك", desc: "تصميم المواد البصرية", demand: "متوسط" },
-        { name: "مصور", desc: "التصوير الفوتوغرافي والفيديو", demand: "متوسط" },
-        { name: "كاتب محتوى", desc: "كتابة المحتوى الإبداعي", demand: "عالي" },
-        { name: "مونتير", desc: "تحرير الفيديو والصوت", demand: "عالي" }
+        { key: 'graphic_designer', demand: "متوسط" },
+        { key: 'photographer', demand: "متوسط" },
+        { key: 'content_writer', demand: "عالي" },
+        { key: 'video_editor', demand: "عالي" }
       ]
     }
   ]
@@ -119,7 +119,9 @@ export default function Careers() {
                 gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
                 gap: '25px'
               }}>
-                {category.careers.map((career, careerIndex) => (
+                {category.careers.map((career, careerIndex) => {
+                  const careerData = t(`careers_page.careers.${career.key}`)
+                  return (
                   <div key={careerIndex} className="target-card" style={{
                     background: 'var(--card-bg)',
                     border: '1px solid rgba(255, 255, 255, 0.1)',
@@ -133,14 +135,14 @@ export default function Careers() {
                       color: 'var(--text-primary)',
                       marginBottom: '10px'
                     }}>
-                      {career.name}
+                      {careerData.name}
                     </h3>
                     <p style={{
                       color: 'var(--text-secondary)',
                       marginBottom: '15px',
                       lineHeight: '1.5'
                     }}>
-                      {career.desc}
+                      {careerData.desc}
                     </p>
                     <div style={{
                       display: 'flex',
@@ -150,7 +152,7 @@ export default function Careers() {
                       borderTop: '1px solid rgba(255, 255, 255, 0.1)'
                     }}>
                       <span style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>
-                        {direction === 'rtl' ? 'الطلب في السوق' : direction === 'en' ? 'Market Demand' : 'Demande du marché'}
+                        {t('careers_page.market_demand')}
                       </span>
                       <span style={{
                         background: career.demand === 'عالي جداً' || career.demand === 'Very High' ? 'var(--accent-neon)' :
@@ -166,7 +168,7 @@ export default function Careers() {
                       </span>
                     </div>
                   </div>
-                ))}
+                )}))}
               </div>
             </div>
           ))}
