@@ -5,9 +5,11 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useAppContext, selectors } from '../context/AppContext'
 import UnifiedNavigation from '../components/UnifiedNavigation'
+import { useTranslation } from '../lib/translation'
 
 export default function Assessments() {
   const { state, actions } = useAppContext()
+  const { t, currentLanguage, direction } = useTranslation()
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
   const router = useRouter()
@@ -23,31 +25,31 @@ export default function Assessments() {
   const personalityGroup = [
     {
       icon: '🧠',
-      title: 'مرآة الشخصية™',
-      brandTitle: 'Personality Mirror™',
-      subtitle: 'افهم نفسك لتختار مستقبلك',
-      description: '3 تقييمات متطورة من مرآة School2Career: للمدارس الإعدادية والثانوية والجامعات',
+      title: t('assessments_page.personality_mirror.title'),
+      brandTitle: t('assessments_page.personality_mirror.brand'),
+      subtitle: t('assessments_page.personality_mirror.subtitle'),
+      description: t('assessments_page.personality_mirror.description'),
       time: null,
       path: '/assessments/big-five',
       active: true,
-      badge: 'متاح الآن'
+      badge: t('assessments_page.personality_mirror.badge')
     },
     {
       icon: '🎯',
-      title: 'بوصلة المهن™',
-      brandTitle: 'Career Compass™',
-      subtitle: 'اكتشف مسارك المهني بدقة علمية',
-      description: '4 تقييمات متطورة من بوصلة School2Career الذكية: للمدارس والجامعات بنسختين (سريع 60 سؤال - شامل 180 سؤال)',
+      title: t('assessments_page.career_compass.title'),
+      brandTitle: t('assessments_page.career_compass.brand'),
+      subtitle: t('assessments_page.career_compass.subtitle'),
+      description: t('assessments_page.career_compass.description'),
       time: null,
       path: '/assessments/riasec',
       active: true,
-      badge: 'متاح الآن'
+      badge: t('assessments_page.career_compass.badge')
     },
     {
       icon: '🌟',
-      title: 'Values & Motivations',
-      subtitle: 'اختبار القيم والدوافع',
-      time: '15 دقيقة',
+      title: t('assessments_page.values_motivations.title'),
+      subtitle: t('assessments_page.values_motivations.subtitle'),
+      time: t('assessments_page.values_motivations.time'),
       path: null,
       disabled: true
     }
@@ -152,7 +154,7 @@ export default function Assessments() {
         background: 'linear-gradient(135deg, #0f0f1e 0%, #1a1a2e 50%, #16213e 100%)',
         color: 'white'
       }}>
-        جاري التحميل...
+        {t('status.loading')}
       </div>
     )
   }
@@ -308,7 +310,7 @@ export default function Assessments() {
           cursor: assessment.path ? 'pointer' : 'not-allowed',
           transition: 'all 0.3s ease'
         }}>
-        {assessment.disabled ? 'قريباً 🔥' : 'ابدأ الاختبار 🚀'}
+        {assessment.disabled ? t('assessments_page.coming_soon') + ' 🔥' : t('assessments_page.start_assessment') + ' 🚀'}
       </button>
     </div>
   )
@@ -338,7 +340,7 @@ export default function Assessments() {
         minHeight: '100vh',
         maxWidth: '1200px',
         margin: '0 auto',
-        direction: 'rtl'
+        direction: direction
       }}>
 
         {/* Header Section */}

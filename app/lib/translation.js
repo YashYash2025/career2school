@@ -199,6 +199,32 @@ const translations = {
     footer: {
       copyright: '© 2025 School2Career - جميع الحقوق محفوظة',
       developer: 'تطوير د. محمد يشار'
+    },
+    assessments_page: {
+      title: 'التقييمات المتاحة',
+      subtitle: 'اختر التقييم المناسب لك',
+      personality_mirror: {
+        title: 'مرآة الشخصية™',
+        brand: 'Personality Mirror™',
+        subtitle: 'افهم نفسك لتختار مستقبلك',
+        description: '3 تقييمات متطورة من مرآة School2Career: للمدارس الإعدادية والثانوية والجامعات',
+        badge: 'متاح الآن'
+      },
+      career_compass: {
+        title: 'بوصلة المهن™',
+        brand: 'Career Compass™',
+        subtitle: 'اكتشف مسارك المهني بدقة علمية',
+        description: '4 تقييمات متطورة من بوصلة School2Career الذكية: للمدارس والجامعات بنسختين (سريع 60 سؤال - شامل 180 سؤال)',
+        badge: 'متاح الآن'
+      },
+      values_motivations: {
+        title: 'القيم والدوافع',
+        subtitle: 'اختبار القيم والدوافع',
+        time: '15 دقيقة',
+        badge: 'قريباً'
+      },
+      start_assessment: 'ابدأ التقييم',
+      coming_soon: 'قريباً'
     }
   },
   en: {
@@ -395,6 +421,32 @@ const translations = {
     footer: {
       copyright: '© 2025 School2Career - All Rights Reserved',
       developer: 'Developed by Dr. Mohamed Yashar'
+    },
+    assessments_page: {
+      title: 'Available Assessments',
+      subtitle: 'Choose the right assessment for you',
+      personality_mirror: {
+        title: 'Personality Mirror™',
+        brand: 'Personality Mirror™',
+        subtitle: 'Understand yourself to choose your future',
+        description: '3 advanced assessments from School2Career Mirror: for middle schools, high schools, and universities',
+        badge: 'Available Now'
+      },
+      career_compass: {
+        title: 'Career Compass™',
+        brand: 'Career Compass™',
+        subtitle: 'Discover your career path with scientific accuracy',
+        description: '4 advanced assessments from School2Career Smart Compass: for schools and universities in two versions (Quick 60 questions - Comprehensive 180 questions)',
+        badge: 'Available Now'
+      },
+      values_motivations: {
+        title: 'Values & Motivations',
+        subtitle: 'Values and Motivations Assessment',
+        time: '15 minutes',
+        badge: 'Coming Soon'
+      },
+      start_assessment: 'Start Assessment',
+      coming_soon: 'Coming Soon'
     }
   },
   fr: {
@@ -591,6 +643,32 @@ const translations = {
     footer: {
       copyright: '© 2025 School2Career - Tous Droits Réservés',
       developer: 'Développé par Dr. Mohamed Yashar'
+    },
+    assessments_page: {
+      title: 'Évaluations disponibles',
+      subtitle: 'Choisissez l\'évaluation qui vous convient',
+      personality_mirror: {
+        title: 'Miroir de Personnalité™',
+        brand: 'Personality Mirror™',
+        subtitle: 'Comprenez-vous pour choisir votre avenir',
+        description: '3 évaluations avancées du Miroir School2Career : pour les collèges, lycées et universités',
+        badge: 'Disponible maintenant'
+      },
+      career_compass: {
+        title: 'Boussole de Carrière™',
+        brand: 'Career Compass™',
+        subtitle: 'Découvrez votre parcours professionnel avec précision scientifique',
+        description: '4 évaluations avancées de la Boussole Intelligente School2Career : pour les écoles et universités en deux versions (Rapide 60 questions - Complète 180 questions)',
+        badge: 'Disponible maintenant'
+      },
+      values_motivations: {
+        title: 'Valeurs et Motivations',
+        subtitle: 'Évaluation des valeurs et motivations',
+        time: '15 minutes',
+        badge: 'Bientôt disponible'
+      },
+      start_assessment: 'Commencer l\'évaluation',
+      coming_soon: 'Bientôt disponible'
     }
   }
 }
