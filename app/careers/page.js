@@ -167,8 +167,7 @@ export default function Careers() {
                         {getDemandTranslation(career.demand)}
                       </span>
                     </div>
-                  </div>
-                  )
+                  </div>)
                 }))}
               </div>
             </div>
