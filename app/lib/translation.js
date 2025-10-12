@@ -203,6 +203,13 @@ const translations = {
     assessments_page: {
       title: 'التقييمات المتاحة',
       subtitle: 'اختر التقييم المناسب لك',
+      main_title: 'منصة التقييمات الذكية',
+      main_subtitle: 'استكشف قدراتك وميولك مع مجموعة متنوعة من التقييمات العلمية المتطورة',
+      personality_group: {
+        title: 'الشخصية والميول',
+        subtitle: 'اكتشف شخصيتك وميولك المهنية وقيمك الأساسية',
+        badge: 'متاح الآن ✨'
+      },
       personality_mirror: {
         title: 'مرآة الشخصية™',
         brand: 'Personality Mirror™',
@@ -425,6 +432,13 @@ const translations = {
     assessments_page: {
       title: 'Available Assessments',
       subtitle: 'Choose the right assessment for you',
+      main_title: 'Smart Assessment Platform',
+      main_subtitle: 'Explore your abilities and interests with a variety of advanced scientific assessments',
+      personality_group: {
+        title: 'Personality & Interests',
+        subtitle: 'Discover your personality, career interests, and core values',
+        badge: 'Available Now ✨'
+      },
       personality_mirror: {
         title: 'Personality Mirror™',
         brand: 'Personality Mirror™',
@@ -647,6 +661,13 @@ const translations = {
     assessments_page: {
       title: 'Évaluations disponibles',
       subtitle: 'Choisissez l\'évaluation qui vous convient',
+      main_title: 'Plateforme d\'Évaluation Intelligente',
+      main_subtitle: 'Explorez vos capacités et intérêts avec une variété d\'évaluations scientifiques avancées',
+      personality_group: {
+        title: 'Personnalité et Intérêts',
+        subtitle: 'Découvrez votre personnalité, vos intérêts professionnels et vos valeurs fondamentales',
+        badge: 'Disponible maintenant ✨'
+      },
       personality_mirror: {
         title: 'Miroir de Personnalité™',
         brand: 'Personality Mirror™',

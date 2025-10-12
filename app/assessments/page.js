@@ -168,8 +168,8 @@ export default function Assessments() {
       transition: 'all 0.3s ease',
       cursor: assessment.path ? 'pointer' : 'default',
       position: 'relative',
-      direction: 'rtl',
-      textAlign: 'right',
+      direction: direction,
+      textAlign: direction === 'rtl' ? 'right' : 'left',
       opacity: assessment.disabled ? 0.7 : 1
     }}
       onMouseEnter={(e) => {
@@ -198,11 +198,11 @@ export default function Assessments() {
           fontWeight: 'bold',
           boxShadow: `0 6px 20px rgba(${themeColor}, 0.4)`
         }}>
-          متاح الآن ✨
+          {assessment.badge || t('assessments_page.personality_group.badge')}
         </div>
       )}
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '15px', direction: 'rtl' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '15px', direction: direction, flexDirection: direction === 'rtl' ? 'row' : 'row' }}>
         <div style={{ flex: 1 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
             <h3 style={{
@@ -264,10 +264,10 @@ export default function Assessments() {
           <p style={{
             color: '#d1d5db',
             fontSize: '13px',
-            textAlign: 'right',
+            textAlign: direction === 'rtl' ? 'right' : 'left',
             lineHeight: '1.6',
             margin: 0,
-            direction: 'rtl'
+            direction: direction
           }}>
             {assessment.description}
           </p>
@@ -352,7 +352,7 @@ export default function Assessments() {
           marginBottom: '50px',
           textAlign: 'center',
           color: 'white',
-          direction: 'rtl'
+          direction: direction
         }}>
           <div style={{
             display: 'flex',
@@ -360,7 +360,7 @@ export default function Assessments() {
             justifyContent: 'center',
             gap: '15px',
             marginBottom: '20px',
-            direction: 'rtl'
+            direction: direction
           }}>
             <h1 style={{
               fontSize: '36px',
@@ -370,7 +370,7 @@ export default function Assessments() {
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent'
             }}>
-              منصة التقييمات الذكية
+              {t('assessments_page.main_title')}
             </h1>
             <span style={{
               background: 'linear-gradient(135deg, #667eea, #764ba2)',
@@ -386,7 +386,7 @@ export default function Assessments() {
             margin: '0 auto',
             lineHeight: '1.6'
           }}>
-            استكشف قدراتك وميولك مع مجموعة متنوعة من التقييمات العلمية المتطورة
+            {t('assessments_page.main_subtitle')}
           </p>
         </div>
 
@@ -397,7 +397,7 @@ export default function Assessments() {
           padding: '35px',
           borderRadius: '25px',
           border: '1px solid rgba(102, 126, 234, 0.2)',
-          direction: 'rtl'
+          direction: direction
         }}>
           <div style={{
             textAlign: 'center',
@@ -412,9 +412,9 @@ export default function Assessments() {
               alignItems: 'center',
               justifyContent: 'center',
               gap: '12px',
-              direction: 'rtl'
+              direction: direction
             }}>
-              الشخصية والميول
+              {t('assessments_page.personality_group.title')}
               <span style={{
                 background: 'linear-gradient(135deg, #667eea, #764ba2)',
                 padding: '10px 14px',
@@ -427,7 +427,7 @@ export default function Assessments() {
               fontSize: '16px',
               margin: 0
             }}>
-              اكتشف شخصيتك وميولك المهنية وقيمك الأساسية
+              {t('assessments_page.personality_group.subtitle')}
             </p>
           </div>
           <div style={{
@@ -446,7 +446,7 @@ export default function Assessments() {
           padding: '35px',
           borderRadius: '25px',
           border: '1px solid rgba(16, 185, 129, 0.2)',
-          direction: 'rtl'
+          direction: direction
         }}>
           <div style={{
             textAlign: 'center',
@@ -495,7 +495,7 @@ export default function Assessments() {
           padding: '35px',
           borderRadius: '25px',
           border: '1px solid rgba(251, 191, 36, 0.2)',
-          direction: 'rtl'
+          direction: direction
         }}>
           <div style={{
             textAlign: 'center',
@@ -544,7 +544,7 @@ export default function Assessments() {
           padding: '35px',
           borderRadius: '25px',
           border: '1px solid rgba(239, 68, 68, 0.2)',
-          direction: 'rtl'
+          direction: direction
         }}>
           <div style={{
             textAlign: 'center',
