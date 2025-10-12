@@ -103,6 +103,38 @@ export default function UnifiedNavigation({ showBackButton = false, backUrl = '/
     fr: { name: 'Français', flag: '🇫🇷' }
   };
 
+  const translations = {
+    ar: {
+      back: 'رجوع',
+      home: 'الرئيسية',
+      assessments: 'التقييمات',
+      careers: 'المهن',
+      dashboard: 'لوحة التحكم',
+      login: 'تسجيل الدخول',
+      logout: 'تسجيل الخروج'
+    },
+    en: {
+      back: 'Back',
+      home: 'Home',
+      assessments: 'Assessments',
+      careers: 'Careers',
+      dashboard: 'Dashboard',
+      login: 'Login',
+      logout: 'Logout'
+    },
+    fr: {
+      back: 'Retour',
+      home: 'Accueil',
+      assessments: 'Évaluations',
+      careers: 'Carrières',
+      dashboard: 'Tableau de bord',
+      login: 'Connexion',
+      logout: 'Déconnexion'
+    }
+  };
+
+  const t = translations[language];
+
   return (
     <nav style={{
       position: 'fixed',
@@ -153,7 +185,7 @@ export default function UnifiedNavigation({ showBackButton = false, backUrl = '/
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M15 19L8 12L15 5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
-            رجوع
+            {t.back}
           </button>
         ) : (
           <Link href="/" style={{
@@ -182,7 +214,7 @@ export default function UnifiedNavigation({ showBackButton = false, backUrl = '/
           transition: 'color 0.3s ease',
           fontFamily: 'Cairo, Arial, sans-serif'
         }}>
-          الرئيسية
+          {t.home}
         </Link>
         <Link href="/assessments" style={{
           color: pathname.includes('/assessments') ? '#667eea' : '#a8a8b8',
@@ -192,7 +224,7 @@ export default function UnifiedNavigation({ showBackButton = false, backUrl = '/
           transition: 'color 0.3s ease',
           fontFamily: 'Cairo, Arial, sans-serif'
         }}>
-          التقييمات
+          {t.assessments}
         </Link>
         <Link href="/careers" style={{
           color: pathname === '/careers' ? '#667eea' : '#a8a8b8',
@@ -202,7 +234,7 @@ export default function UnifiedNavigation({ showBackButton = false, backUrl = '/
           transition: 'color 0.3s ease',
           fontFamily: 'Cairo, Arial, sans-serif'
         }}>
-          المهن
+          {t.careers}
         </Link>
         {user && (
           <Link href="/dashboard" style={{
@@ -213,7 +245,7 @@ export default function UnifiedNavigation({ showBackButton = false, backUrl = '/
             transition: 'color 0.3s ease',
             fontFamily: 'Cairo, Arial, sans-serif'
           }}>
-            لوحة التحكم
+            {t.dashboard}
           </Link>
         )}
       </div>
@@ -381,7 +413,7 @@ export default function UnifiedNavigation({ showBackButton = false, backUrl = '/
                 onMouseLeave={(e) => {
                   e.currentTarget.style.background = 'transparent';
                 }}>
-                  📊 لوحة التحكم
+                  📊 {t.dashboard}
                 </Link>
                 <button
                   onClick={handleLogout}
@@ -397,7 +429,7 @@ export default function UnifiedNavigation({ showBackButton = false, backUrl = '/
                     fontSize: '14px',
                     fontFamily: 'Cairo, Arial, sans-serif',
                     transition: 'all 0.3s ease',
-                    textAlign: 'right'
+                    textAlign: language === 'ar' ? 'right' : 'left'
                   }}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)';
@@ -406,7 +438,7 @@ export default function UnifiedNavigation({ showBackButton = false, backUrl = '/
                     e.currentTarget.style.background = 'transparent';
                   }}
                 >
-                  🚪 تسجيل الخروج
+                  🚪 {t.logout}
                 </button>
               </div>
             )}
@@ -423,7 +455,7 @@ export default function UnifiedNavigation({ showBackButton = false, backUrl = '/
             fontFamily: 'Cairo, Arial, sans-serif',
             transition: 'all 0.3s ease'
           }}>
-            تسجيل الدخول
+            {t.login}
           </Link>
         )}
       </div>
