@@ -204,33 +204,21 @@ export default function Assessments() {
 
       <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '15px', direction: direction, flexDirection: direction === 'rtl' ? 'row' : 'row' }}>
         <div style={{ flex: 1 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+          <div style={{ marginBottom: '8px' }}>
             <h3 style={{
               fontSize: '20px',
               color: 'white',
-              textAlign: 'right',
+              textAlign: direction === 'rtl' ? 'right' : 'left',
               fontWeight: 'bold',
               margin: 0
             }}>
               {assessment.title}
             </h3>
-            {assessment.badge && (
-              <span style={{
-                background: `linear-gradient(135deg, rgb(${themeColor}), rgba(${themeColor}, 0.8))`,
-                color: 'white',
-                padding: '4px 12px',
-                borderRadius: '12px',
-                fontSize: '11px',
-                fontWeight: 'bold'
-              }}>
-                {assessment.badge}
-              </span>
-            )}
           </div>
           <p style={{
             color: '#a8a8b8',
             fontSize: '14px',
-            textAlign: 'right',
+            textAlign: direction === 'rtl' ? 'right' : 'left',
             lineHeight: '1.5',
             margin: 0
           }}>
