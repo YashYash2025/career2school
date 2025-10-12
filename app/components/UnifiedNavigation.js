@@ -3,14 +3,17 @@
 import { useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
+import { useTranslation } from '../lib/translation';
 
 export default function UnifiedNavigation({ showBackButton = false, backUrl = '/assessments' }) {
   const router = useRouter();
   const pathname = usePathname();
   const [user, setUser] = useState(null);
-  const [language, setLanguage] = useState('ar');
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showLangMenu, setShowLangMenu] = useState(false);
+  
+  // Use translation hook
+  const { t, currentLanguage, changeLanguage, languages: availableLanguages, direction } = useTranslation();
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -62,17 +65,11 @@ export default function UnifiedNavigation({ showBackButton = false, backUrl = '/
     };
 
     checkAuth();
-
-    // جلب اللغة المحفوظة
-    const savedLang = localStorage.getItem('language') || 'ar';
-    setLanguage(savedLang);
   }, []);
 
   const handleLanguageChange = (lang) => {
-    setLanguage(lang);
-    localStorage.setItem('language', lang);
+    changeLanguage(lang);
     setShowLangMenu(false);
-    // يمكن إضافة reload أو تحديث الصفحة هنا
   };
 
   const handleLogout = async () => {
@@ -97,43 +94,7 @@ export default function UnifiedNavigation({ showBackButton = false, backUrl = '/
     router.push('/login');
   };
 
-  const languages = {
-    ar: { name: 'العربية', flag: '🇸🇦' },
-    en: { name: 'English', flag: '🇬🇧' },
-    fr: { name: 'Français', flag: '🇫🇷' }
-  };
 
-  const translations = {
-    ar: {
-      back: 'رجوع',
-      home: 'الرئيسية',
-      assessments: 'التقييمات',
-      careers: 'المهن',
-      dashboard: 'لوحة التحكم',
-      login: 'تسجيل الدخول',
-      logout: 'تسجيل الخروج'
-    },
-    en: {
-      back: 'Back',
-      home: 'Home',
-      assessments: 'Assessments',
-      careers: 'Careers',
-      dashboard: 'Dashboard',
-      login: 'Login',
-      logout: 'Logout'
-    },
-    fr: {
-      back: 'Retour',
-      home: 'Accueil',
-      assessments: 'Évaluations',
-      careers: 'Carrières',
-      dashboard: 'Tableau de bord',
-      login: 'Connexion',
-      logout: 'Déconnexion'
-    }
-  };
-
-  const t = translations[language];
 
   return (
     <nav style={{
@@ -185,7 +146,7 @@ export default function UnifiedNavigation({ showBackButton = false, backUrl = '/
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M15 19L8 12L15 5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
-            {t.back}
+            {t('nav.back') || t('buttons.back')}
           </button>
         ) : (
           <Link href="/" style={{
@@ -214,7 +175,7 @@ export default function UnifiedNavigation({ showBackButton = false, backUrl = '/
           transition: 'color 0.3s ease',
           fontFamily: 'Cairo, Arial, sans-serif'
         }}>
-          {t.home}
+          {t('nav.home')}
         </Link>
         <Link href="/assessments" style={{
           color: pathname.includes('/assessments') ? '#667eea' : '#a8a8b8',
@@ -224,7 +185,7 @@ export default function UnifiedNavigation({ showBackButton = false, backUrl = '/
           transition: 'color 0.3s ease',
           fontFamily: 'Cairo, Arial, sans-serif'
         }}>
-          {t.assessments}
+          {t('nav.assessments')}
         </Link>
         <Link href="/careers" style={{
           color: pathname === '/careers' ? '#667eea' : '#a8a8b8',
@@ -234,7 +195,7 @@ export default function UnifiedNavigation({ showBackButton = false, backUrl = '/
           transition: 'color 0.3s ease',
           fontFamily: 'Cairo, Arial, sans-serif'
         }}>
-          {t.careers}
+          {t('nav.careers')}
         </Link>
         {user && (
           <Link href="/dashboard" style={{
@@ -245,7 +206,7 @@ export default function UnifiedNavigation({ showBackButton = false, backUrl = '/
             transition: 'color 0.3s ease',
             fontFamily: 'Cairo, Arial, sans-serif'
           }}>
-            {t.dashboard}
+            {t('nav.dashboard')}
           </Link>
         )}
       </div>
@@ -282,8 +243,8 @@ export default function UnifiedNavigation({ showBackButton = false, backUrl = '/
               e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
             }}
           >
-            <span style={{ fontSize: '16px' }}>{languages[language].flag}</span>
-            <span>{languages[language].name}</span>
+            <span style={{ fontSize: '16px' }}>{availableLanguages.find(l => l.code === currentLanguage)?.flag}</span>
+            <span>{availableLanguages.find(l => l.code === currentLanguage)?.name}</span>
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M6 9L12 15L18 9" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
@@ -303,17 +264,17 @@ export default function UnifiedNavigation({ showBackButton = false, backUrl = '/
               boxShadow: '0 8px 24px rgba(0, 0, 0, 0.4)',
               zIndex: 1001
             }}>
-              {Object.entries(languages).map(([code, lang]) => (
+              {availableLanguages.map((lang) => (
                 <button
-                  key={code}
-                  onClick={() => handleLanguageChange(code)}
+                  key={lang.code}
+                  onClick={() => handleLanguageChange(lang.code)}
                   style={{
                     width: '100%',
                     display: 'flex',
                     alignItems: 'center',
                     gap: '10px',
                     padding: '10px 12px',
-                    background: language === code ? 'rgba(102, 126, 234, 0.2)' : 'transparent',
+                    background: currentLanguage === lang.code ? 'rgba(102, 126, 234, 0.2)' : 'transparent',
                     border: 'none',
                     borderRadius: '8px',
                     color: 'white',
@@ -321,15 +282,15 @@ export default function UnifiedNavigation({ showBackButton = false, backUrl = '/
                     fontSize: '14px',
                     fontFamily: 'Cairo, Arial, sans-serif',
                     transition: 'all 0.3s ease',
-                    textAlign: 'right'
+                    textAlign: direction === 'rtl' ? 'right' : 'left'
                   }}
                   onMouseEnter={(e) => {
-                    if (language !== code) {
+                    if (currentLanguage !== lang.code) {
                       e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
                     }
                   }}
                   onMouseLeave={(e) => {
-                    if (language !== code) {
+                    if (currentLanguage !== lang.code) {
                       e.currentTarget.style.background = 'transparent';
                     }
                   }}
@@ -413,7 +374,7 @@ export default function UnifiedNavigation({ showBackButton = false, backUrl = '/
                 onMouseLeave={(e) => {
                   e.currentTarget.style.background = 'transparent';
                 }}>
-                  📊 {t.dashboard}
+                  📊 {t('nav.dashboard')}
                 </Link>
                 <button
                   onClick={handleLogout}
@@ -438,7 +399,7 @@ export default function UnifiedNavigation({ showBackButton = false, backUrl = '/
                     e.currentTarget.style.background = 'transparent';
                   }}
                 >
-                  🚪 {t.logout}
+                  🚪 {t('nav.logout')}
                 </button>
               </div>
             )}
@@ -455,7 +416,7 @@ export default function UnifiedNavigation({ showBackButton = false, backUrl = '/
             fontFamily: 'Cairo, Arial, sans-serif',
             transition: 'all 0.3s ease'
           }}>
-            {t.login}
+            {t('nav.login')}
           </Link>
         )}
       </div>
