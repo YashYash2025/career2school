@@ -168,7 +168,7 @@ export default function Careers() {
                       </span>
                     </div>
                   </div>
-                  );
+                  )
                 }))}
               </div>
             </div>
