@@ -2,11 +2,20 @@
 
 import Link from 'next/link'
 import UnifiedNavigation from '../components/UnifiedNavigation'
+import { useTranslation } from '../lib/translation'
 
 export default function Careers() {
+  const { t, direction } = useTranslation()
+  
+  const getDemandTranslation = (demand) => {
+    if (demand === 'عالي جداً' || demand === 'Very High' || demand === 'Très Élevé') return t('careers_page.demand.very_high')
+    if (demand === 'عالي' || demand === 'High' || demand === 'Élevé') return t('careers_page.demand.high')
+    if (demand === 'متوسط' || demand === 'Medium' || demand === 'Moyen') return t('careers_page.demand.medium')
+    return t('careers_page.demand.low')
+  }
   const careerPaths = [
     {
-      category: "العلوم والتكنولوجيا",
+      category: t('careers_page.categories.science_tech'),
       icon: "🔬",
       careers: [
         { name: "طبيب", desc: "تشخيص وعلاج الأمراض", demand: "عالي" },
@@ -16,7 +25,7 @@ export default function Careers() {
       ]
     },
     {
-      category: "التكنولوجيا والبرمجة",
+      category: t('careers_page.categories.technology_programming'),
       icon: "💻",
       careers: [
         { name: "مطور تطبيقات", desc: "تطوير التطبيقات والمواقع", demand: "عالي جداً" },
@@ -26,7 +35,7 @@ export default function Careers() {
       ]
     },
     {
-      category: "الأعمال والإدارة",
+      category: t('careers_page.categories.business_management'),
       icon: "💼",
       careers: [
         { name: "مدير مشاريع", desc: "إدارة وتنفيذ المشاريع", demand: "عالي" },
@@ -36,7 +45,7 @@ export default function Careers() {
       ]
     },
     {
-      category: "الفنون والإبداع",
+      category: t('careers_page.categories.arts_creativity'),
       icon: "🎨",
       careers: [
         { name: "مصمم جرافيك", desc: "تصميم المواد البصرية", demand: "متوسط" },
@@ -61,19 +70,19 @@ export default function Careers() {
       </div>
 
       {/* Main Content */}
-      <main style={{ paddingTop: '120px', minHeight: '100vh' }}>
+      <main style={{ paddingTop: '120px', minHeight: '100vh', direction: direction }}>
         <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '40px 50px' }}>
           
           {/* Header */}
-          <div style={{ textAlign: 'center', marginBottom: '60px' }}>
-            <h1 className="section-title">المهن والمسارات الوظيفية</h1>
+          <div style={{ textAlign: 'center', marginBottom: '60px', direction: direction }}>
+            <h1 className="section-title">{t('careers_page.title')}</h1>
             <p style={{ 
               fontSize: '20px', 
               color: 'var(--text-secondary)', 
               marginTop: '20px',
               lineHeight: '1.6'
             }}>
-              اكتشف الوظائف والمسارات المهنية التي تناسب مهاراتك واهتماماتك
+              {t('careers_page.subtitle')}
             </p>
           </div>
 
@@ -141,19 +150,19 @@ export default function Careers() {
                       borderTop: '1px solid rgba(255, 255, 255, 0.1)'
                     }}>
                       <span style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>
-                        الطلب في السوق
+                        {direction === 'rtl' ? 'الطلب في السوق' : direction === 'en' ? 'Market Demand' : 'Demande du marché'}
                       </span>
                       <span style={{
-                        background: career.demand === 'عالي جداً' ? 'var(--accent-neon)' :
-                                   career.demand === 'عالي' ? 'var(--accent-purple)' :
+                        background: career.demand === 'عالي جداً' || career.demand === 'Very High' ? 'var(--accent-neon)' :
+                                   career.demand === 'عالي' || career.demand === 'High' ? 'var(--accent-purple)' :
                                    'var(--accent-pink)',
-                        color: career.demand === 'عالي جداً' ? 'var(--dark-bg)' : 'white',
+                        color: career.demand === 'عالي جداً' || career.demand === 'Very High' ? 'var(--dark-bg)' : 'white',
                         padding: '5px 12px',
                         borderRadius: '15px',
                         fontSize: '12px',
                         fontWeight: 'bold'
                       }}>
-                        {career.demand}
+                        {getDemandTranslation(career.demand)}
                       </span>
                     </div>
                   </div>

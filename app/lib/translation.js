@@ -232,6 +232,22 @@ const translations = {
       },
       start_assessment: 'ابدأ التقييم',
       coming_soon: 'قريباً'
+    },
+    careers_page: {
+      title: 'المسارات المهنية',
+      subtitle: 'استكشف المهن المتاحة في مختلف المجالات',
+      demand: {
+        high: 'عالي',
+        very_high: 'عالي جداً',
+        medium: 'متوسط',
+        low: 'منخفض'
+      },
+      categories: {
+        science_tech: 'العلوم والتكنولوجيا',
+        technology_programming: 'التكنولوجيا والبرمجة',
+        business_management: 'الأعمال والإدارة',
+        arts_creativity: 'الفنون والإبداع'
+      }
     }
   },
   en: {
@@ -461,6 +477,22 @@ const translations = {
       },
       start_assessment: 'Start Assessment',
       coming_soon: 'Coming Soon'
+    },
+    careers_page: {
+      title: 'Career Paths',
+      subtitle: 'Explore available careers in various fields',
+      demand: {
+        high: 'High',
+        very_high: 'Very High',
+        medium: 'Medium',
+        low: 'Low'
+      },
+      categories: {
+        science_tech: 'Science & Technology',
+        technology_programming: 'Technology & Programming',
+        business_management: 'Business & Management',
+        arts_creativity: 'Arts & Creativity'
+      }
     }
   },
   fr: {
@@ -690,6 +722,22 @@ const translations = {
       },
       start_assessment: 'Commencer l\'évaluation',
       coming_soon: 'Bientôt disponible'
+    },
+    careers_page: {
+      title: 'Parcours Professionnels',
+      subtitle: 'Explorez les carrières disponibles dans divers domaines',
+      demand: {
+        high: 'Élevé',
+        very_high: 'Très Élevé',
+        medium: 'Moyen',
+        low: 'Faible'
+      },
+      categories: {
+        science_tech: 'Sciences et Technologie',
+        technology_programming: 'Technologie et Programmation',
+        business_management: 'Affaires et Gestion',
+        arts_creativity: 'Arts et Créativité'
+      }
     }
   }
 }
