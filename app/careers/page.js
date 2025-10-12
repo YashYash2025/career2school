@@ -121,7 +121,8 @@ export default function Careers() {
               }}>
                 {category.careers.map((career, careerIndex) => {
                   const careerData = t(`careers_page.careers.${career.key}`)
-                  return (<div key={careerIndex} className="target-card" style={{
+                  return (
+                    <div key={careerIndex} className="target-card" style={{
                     background: 'var(--card-bg)',
                     border: '1px solid rgba(255, 255, 255, 0.1)',
                     borderRadius: '20px',
@@ -166,7 +167,8 @@ export default function Careers() {
                         {getDemandTranslation(career.demand)}
                       </span>
                     </div>
-                  </div>)
+                  </div>
+                  );
                 }))}
               </div>
             </div>
